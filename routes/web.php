@@ -33,7 +33,9 @@ Route::post('/notifications/read-all', 'NotificationController@markAllAsRead')->
 // ==========================================
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
     // User Management
+    Route::post('users/send-credentials', 'Admin\UserController@sendCredentials')->name('users.send-credentials');
     Route::resource('users', 'Admin\UserController');
+    Route::post('users/{user}/send-credential', 'Admin\UserController@sendCredential')->name('users.send-credential');
     Route::post('users/{user}/toggle-active', 'Admin\UserController@toggleActive')->name('users.toggle-active');
 
     // Laporan WFH

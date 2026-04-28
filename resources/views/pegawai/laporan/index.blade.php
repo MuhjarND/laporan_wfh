@@ -10,6 +10,9 @@
 <style>
     .laporan-card .card-header {
         min-height: 52px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
     .laporan-card .card-title {
@@ -18,6 +21,7 @@
 
     .laporan-card .card-tools {
         margin-right: 0;
+        margin-left: auto;
     }
 
     .laporan-action-group {

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\LaporanWfh;
+use App\User;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
@@ -124,6 +125,38 @@ class WhatsAppNotificationService
         ]);
 
         return $this->send($laporan->user->phone, $message);
+    }
+
+    public function sendAccountCredential(User $user, $plainPassword)
+    {
+        if (!$user->phone) {
+            return false;
+        }
+
+        $message = implode("\n", [
+            '*[NOTIF LAPWFH]*',
+            '',
+            "Assalamu'alaikum wr wb.",
+            '',
+            'Yth. Bapak/Ibu ' . $user->name . ',',
+            '',
+            'Berikut kami sampaikan informasi akun untuk mengakses Sistem Laporan WFH PTA Papua Barat.',
+            '',
+            'Username (NIP): ' . $user->nip,
+            'Password: ' . $plainPassword,
+            '',
+            'Silakan masuk melalui tautan berikut:',
+            route('login'),
+            '',
+            'Demi keamanan akun, mohon menjaga kerahasiaan password dan tidak membagikannya kepada pihak lain.',
+            '',
+            'Terima kasih.',
+            "Wassalamu'alaikum wr wb.",
+            '',
+            '- *Sistem Laporan WFA PTA Papua Barat*',
+        ]);
+
+        return $this->send($user->phone, $message);
     }
 
     public function send($phone, $message)

@@ -106,6 +106,16 @@
             font-weight: 600; border-radius: 10px 10px 0 0 !important; padding: 12px 16px;
         }
         .card-header .card-title { font-size: .9rem; color: var(--text-dark); }
+        .card-header.d-flex { gap: 12px; }
+        .card-header.d-flex .card-title { margin-bottom: 0; }
+        .card-header .card-tools {
+            float: none;
+            margin-left: auto;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
         .card-footer { background: #f9fafb; border-top: 1px solid var(--border); }
 
         /* ===== SMALL BOX ===== */
@@ -127,6 +137,12 @@
             text-transform: uppercase; letter-spacing: .5px; padding: 10px 12px;
         }
         .table td { border-top: 1px solid #f1f5f9; padding: 10px 12px; vertical-align: middle; }
+        .table th:last-child,
+        .table td:last-child { text-align: right; }
+        .table td:last-child .btn-group,
+        .table td:last-child .users-actions {
+            justify-content: flex-end;
+        }
         .table-hover tbody tr:hover { background: #f0fdf4; }
         .table-striped tbody tr:nth-of-type(odd) { background: #fafbfc; }
 

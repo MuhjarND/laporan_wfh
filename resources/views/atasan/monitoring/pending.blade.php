@@ -8,7 +8,7 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex align-items-center">
         <h3 class="card-title"><i class="fas fa-clock mr-2"></i>Laporan Menunggu Persetujuan</h3>
         @if($laporans->total() > 0)
             <div class="card-tools">

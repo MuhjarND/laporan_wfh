@@ -6,13 +6,64 @@
     <li class="breadcrumb-item active">Kelola User</li>
 @endsection
 
+@section('styles')
+<style>
+    .users-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .users-card-header .card-title {
+        margin-bottom: 0;
+    }
+    .users-header-actions {
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .users-actions {
+        display: flex;
+        justify-content: flex-start;
+        gap: 4px;
+        flex-wrap: nowrap;
+    }
+    .users-actions form {
+        display: inline-block;
+    }
+    @media (max-width: 576px) {
+        .users-card-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+        .users-header-actions {
+            width: 100%;
+            margin-left: 0;
+        }
+        .users-header-actions .btn,
+        .users-header-actions form {
+            width: 100%;
+        }
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header users-card-header">
         <h3 class="card-title"><i class="fas fa-users mr-2"></i>Daftar User</h3>
-        <a href="{{ route('admin.users.create') }}" class="btn btn-sm btn-primary">
-            <i class="fas fa-plus mr-1"></i> Tambah User
-        </a>
+        <div class="users-header-actions">
+            <form action="{{ route('admin.users.send-credentials') }}" method="POST" onsubmit="return confirm('Kirim username dan password ke seluruh user non-superadmin? Password akan disetel ulang menjadi NIP masing-masing user.');">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-success">
+                    <i class="fab fa-whatsapp mr-1"></i> Kirim Akun Semua
+                </button>
+            </form>
+            <a href="{{ route('admin.users.create') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus mr-1"></i> Tambah User
+            </a>
+        </div>
     </div>
     <div class="card-body">
         <form action="{{ route('admin.users.index') }}" method="GET" class="mb-3">
@@ -76,7 +127,15 @@
                             @endif
                         </td>
                         <td>
-                            <div class="btn-group btn-group-sm">
+                            <div class="users-actions">
+                                @if(!$user->isSuperAdmin())
+                                <form action="{{ route('admin.users.send-credential', $user) }}" method="POST" onsubmit="return confirm('Kirim username dan password ke WhatsApp user ini? Password akan disetel ulang menjadi NIP user.');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-success" title="Kirim Akun via WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                </form>
+                                @endif
                                 <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-warning" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>

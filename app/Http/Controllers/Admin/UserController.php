@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\User;
+use App\Services\WhatsAppNotificationService;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
@@ -133,5 +134,65 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Status user berhasil diperbarui.');
+    }
+
+    public function sendCredential(User $user, WhatsAppNotificationService $whatsApp)
+    {
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Akun super admin tidak dapat dikirim melalui fitur ini.');
+        }
+
+        $plainPassword = $user->nip;
+        $user->update([
+            'password' => Hash::make($plainPassword),
+        ]);
+
+        if (!$user->phone) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'User belum memiliki nomor WhatsApp.');
+        }
+
+        if (!$whatsApp->sendAccountCredential($user, $plainPassword)) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Gagal mengirim akun ke WhatsApp user.');
+        }
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Akun berhasil dikirim ke ' . $user->name . '. Password disetel menjadi NIP user.');
+    }
+
+    public function sendCredentials(WhatsAppNotificationService $whatsApp)
+    {
+        $users = User::where('role', '!=', 'super_admin')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $sent = 0;
+        $failed = 0;
+        $withoutPhone = 0;
+
+        foreach ($users as $user) {
+            $plainPassword = $user->nip;
+            $user->update([
+                'password' => Hash::make($plainPassword),
+            ]);
+
+            if (!$user->phone) {
+                $withoutPhone++;
+                continue;
+            }
+
+            if ($whatsApp->sendAccountCredential($user, $plainPassword)) {
+                $sent++;
+            } else {
+                $failed++;
+            }
+        }
+
+        $message = 'Akun berhasil diproses. Terkirim: ' . $sent . ', tanpa nomor WA: ' . $withoutPhone . ', gagal kirim: ' . $failed . '. Password user non-superadmin telah disetel menjadi NIP masing-masing.';
+
+        return redirect()->route('admin.users.index')->with('success', $message);
     }
 }

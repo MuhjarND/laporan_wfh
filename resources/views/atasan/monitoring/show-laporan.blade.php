@@ -25,9 +25,10 @@
         touch-action: none;
     }
     .review-card-tools {
-        float: right;
         display: flex;
+        justify-content: flex-end;
         gap: 8px;
+        margin-left: auto;
     }
     .rich-content p,
     .rich-content ul,
@@ -79,7 +80,7 @@
 
     <div class="col-lg-8">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header d-flex align-items-center">
                 <h3 class="card-title"><i class="fas fa-list mr-2"></i>Daftar Kegiatan ({{ $laporan->kegiatan->count() }})</h3>
                 <div class="review-card-tools">
                     @if($laporan->kegiatan->count() > 0)

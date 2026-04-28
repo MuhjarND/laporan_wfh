@@ -8,13 +8,15 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex align-items-center">
         <h3 class="card-title"><i class="fas fa-bell mr-2" style="color:var(--primary);"></i>Semua Notifikasi</h3>
-        @if(auth()->user()->unreadNotifications->count() > 0)
-            <form action="{{ route('notifications.read-all') }}" method="POST">@csrf
-                <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="fas fa-check-double mr-1"></i> Tandai Semua Dibaca</button>
-            </form>
-        @endif
+        <div class="card-tools">
+            @if(auth()->user()->unreadNotifications->count() > 0)
+                <form action="{{ route('notifications.read-all') }}" method="POST">@csrf
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="fas fa-check-double mr-1"></i> Tandai Semua Dibaca</button>
+                </form>
+            @endif
+        </div>
     </div>
     <div class="card-body p-0">
         @forelse($notifications as $notif)

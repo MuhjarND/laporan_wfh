@@ -8,7 +8,7 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex align-items-center">
         <h3 class="card-title"><i class="fas fa-file-alt mr-2"></i>Daftar Seluruh Laporan WFH</h3>
         <div class="card-tools">
             <a href="{{ route('admin.laporan.download-all-pdf') }}" class="btn btn-sm btn-success {{ $totalLaporan === 0 ? 'disabled' : '' }}">

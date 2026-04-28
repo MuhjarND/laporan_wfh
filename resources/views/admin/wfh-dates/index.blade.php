@@ -8,18 +8,19 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex align-items-center">
         <h3 class="card-title"><i class="fas fa-calendar-alt mr-2"></i>Daftar Tanggal WFH</h3>
-        <a href="{{ route('admin.wfh-dates.create') }}" class="btn btn-sm btn-primary">
-            <i class="fas fa-plus mr-1"></i> Tambah Tanggal
-        </a>
+        <div class="card-tools">
+            <a href="{{ route('admin.wfh-dates.create') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus mr-1"></i> Tambah Tanggal
+            </a>
+        </div>
     </div>
     <div class="card-body">
         <form action="{{ route('admin.wfh-dates.index') }}" method="GET" class="mb-3">
             <div class="row">
                 <div class="col-md-3">
-                    <select name="bulan" class="form-control">disetujui oleh Atasan Langsung.
-                    
+                    <select name="bulan" class="form-control">
                         <option value="">Semua Bulan</option>
                         @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $i => $nm)
                             <option value="{{ $i+1 }}" {{ request('bulan') == $i+1 ? 'selected' : '' }}>{{ $nm }}</option>

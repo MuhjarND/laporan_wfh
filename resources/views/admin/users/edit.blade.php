@@ -126,7 +126,7 @@
 @section('scripts')
 <script>
 $('#roleSelect').on('change', function() {
-    $('#atasanField').toggle($(this).val() === 'pegawai');
+    $('#atasanField').toggle($(this).val() === 'pegawai' || $(this).val() === 'atasan');
 }).trigger('change');
 </script>
 @endsection

@@ -130,7 +130,7 @@
 @section('scripts')
 <script>
 $('#roleSelect').on('change', function() {
-    if ($(this).val() === 'pegawai') {
+    if ($(this).val() === 'pegawai' || $(this).val() === 'atasan') {
         $('#atasanField').show();
     } else {
         $('#atasanField').hide();

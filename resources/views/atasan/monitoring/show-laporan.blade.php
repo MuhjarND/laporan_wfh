@@ -113,8 +113,14 @@
                                 <td><div class="rich-content">{!! $keg->kegiatan !!}</div></td>
                                 <td>
                                     <div class="rich-content">{!! $keg->capaian !!}</div>
-                                    @if($keg->eviden_preview_link)
-                                        <br><a href="{{ $keg->eviden_preview_link }}" target="_blank" rel="noopener" style="color:var(--primary);font-weight:600;"><i class="fas fa-link mr-1"></i>Lihat Eviden</a>
+                                    @if($keg->all_evidens->isNotEmpty())
+                                        <div class="mt-1">
+                                            @foreach($keg->all_evidens as $eviden)
+                                                <a href="{{ $eviden->preview_link }}" target="_blank" rel="noopener" class="d-block" style="color:var(--primary);font-weight:600;">
+                                                    <i class="fas fa-link mr-1"></i>{{ Str::limit($eviden->original_name ?? 'Lihat Eviden', 32) }}
+                                                </a>
+                                            @endforeach
+                                        </div>
                                     @endif
                                 </td>
                                 <td>{{ $keg->tempat_wfh }}</td>

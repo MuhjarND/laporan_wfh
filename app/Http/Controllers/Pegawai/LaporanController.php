@@ -6,11 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\LaporanWfh;
 use App\KegiatanWfh;
+use App\KegiatanWfhEviden;
 use App\WfhDate;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use App\Services\WhatsAppNotificationService;
 
 class LaporanController extends Controller
@@ -87,7 +88,7 @@ class LaporanController extends Controller
                 ->with('info', 'Laporan yang sudah disetujui tidak dapat diedit.');
         }
 
-        $laporan->load('kegiatan');
+        $laporan->load('kegiatan.evidens');
 
         $wfhDates = $this->eligibleWfhDatesForUser(auth()->user(), $laporan->bulan, $laporan->tahun);
 
@@ -97,7 +98,7 @@ class LaporanController extends Controller
     public function show(LaporanWfh $laporan)
     {
         $this->checkOwnership($laporan);
-        $laporan->load('kegiatan', 'user', 'approver');
+        $laporan->load('kegiatan.evidens', 'user', 'approver');
 
         return view('pegawai.laporan.show', compact('laporan'));
     }
@@ -132,8 +133,10 @@ class LaporanController extends Controller
             'kegiatan' => 'required|string',
             'capaian' => 'required|string',
             'tempat_wfh' => 'required|string|max:255',
-            'eviden' => 'nullable|file|max:10240',
+            'eviden' => 'nullable|array|max:10',
+            'eviden.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
+        $this->validateEvidenFileExtensions($request);
 
         if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
             return redirect()->back()
@@ -141,19 +144,15 @@ class LaporanController extends Controller
                 ->with('error', 'Tanggal WFH tidak tersedia untuk akun Anda.');
         }
 
-        $data = [
+        $kegiatan = KegiatanWfh::create([
             'laporan_id' => $laporan->id,
             'tanggal' => $request->tanggal,
             'kegiatan' => $this->sanitizeRichText($request->kegiatan),
             'capaian' => $this->sanitizeRichText($request->capaian),
             'tempat_wfh' => $request->tempat_wfh,
-        ];
+        ]);
 
-        if ($request->hasFile('eviden')) {
-            $data = array_merge($data, $this->storeEvidenFile($request));
-        }
-
-        KegiatanWfh::create($data);
+        $this->storeEvidenFiles($request, $kegiatan);
 
         // Reset status if was submitted/rejected
         if (in_array($laporan->status, ['submitted', 'rejected'])) {
@@ -178,8 +177,10 @@ class LaporanController extends Controller
             'kegiatan' => 'required|string',
             'capaian' => 'required|string',
             'tempat_wfh' => 'required|string|max:255',
-            'eviden' => 'nullable|file|max:10240',
+            'eviden' => 'nullable|array|max:10',
+            'eviden.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
+        $this->validateEvidenFileExtensions($request);
 
         if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
             return redirect()->back()
@@ -194,19 +195,8 @@ class LaporanController extends Controller
             'tempat_wfh' => $request->tempat_wfh,
         ];
 
-        if ($request->hasFile('eviden')) {
-            if ($kegiatan->eviden_path) {
-                Storage::disk('local')->delete($kegiatan->eviden_path);
-            }
-
-            $data = array_merge($data, $this->storeEvidenFile($request));
-        }
-
-        if (!empty($data['eviden_path']) && empty($kegiatan->eviden_token)) {
-            $data['eviden_token'] = (string) Str::uuid();
-        }
-
         $kegiatan->update($data);
+        $this->storeEvidenFiles($request, $kegiatan);
 
         return redirect()->route('pegawai.laporan.edit', $laporan)
             ->with('success', 'Kegiatan berhasil diperbarui.');
@@ -255,7 +245,7 @@ class LaporanController extends Controller
     public function preview(LaporanWfh $laporan)
     {
         $this->checkOwnership($laporan);
-        $laporan->load('kegiatan', 'user', 'user.atasan');
+        $laporan->load('kegiatan.evidens', 'user', 'user.atasan');
 
         $isPdf = true;
         $pdf = PDF::loadView('pdf.laporan-wfh', compact('laporan', 'isPdf'));
@@ -269,7 +259,7 @@ class LaporanController extends Controller
     public function downloadPdf(LaporanWfh $laporan)
     {
         $this->checkOwnership($laporan);
-        $laporan->load('kegiatan', 'user', 'user.atasan');
+        $laporan->load('kegiatan.evidens', 'user', 'user.atasan');
 
         $isPdf = true;
         $pdf = PDF::loadView('pdf.laporan-wfh', compact('laporan', 'isPdf'));
@@ -283,7 +273,7 @@ class LaporanController extends Controller
     public function downloadAllPdf()
     {
         $user = auth()->user();
-        $laporans = LaporanWfh::with(['kegiatan', 'user', 'user.atasan'])
+        $laporans = LaporanWfh::with(['kegiatan.evidens', 'user', 'user.atasan'])
             ->where('user_id', $user->id)
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
@@ -324,15 +314,61 @@ class LaporanController extends Controller
         }
     }
 
-    private function storeEvidenFile(Request $request)
+    private function storeEvidenFiles(Request $request, KegiatanWfh $kegiatan)
     {
-        $file = $request->file('eviden');
+        if (!$request->hasFile('eviden')) {
+            return;
+        }
 
+        foreach ($this->evidenFiles($request) as $file) {
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if (!in_array($extension, $this->allowedEvidenExtensions(), true)) {
+                throw ValidationException::withMessages([
+                    'eviden' => 'Tipe file eviden tidak diizinkan.',
+                ]);
+            }
+
+            KegiatanWfhEviden::create([
+                'kegiatan_id' => $kegiatan->id,
+                'token' => (string) Str::uuid(),
+                'path' => $file->store('eviden_wfh', 'local'),
+                'original_name' => $file->getClientOriginalName(),
+                'mime' => $file->getClientMimeType(),
+                'size' => $file->getSize(),
+            ]);
+        }
+    }
+
+    private function validateEvidenFileExtensions(Request $request)
+    {
+        if (!$request->hasFile('eviden')) {
+            return;
+        }
+
+        foreach ($this->evidenFiles($request) as $file) {
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if (!in_array($extension, $this->allowedEvidenExtensions(), true)) {
+                throw ValidationException::withMessages([
+                    'eviden' => 'Tipe file eviden tidak diizinkan. Gunakan gambar, PDF, dokumen Office, atau TXT.',
+                ]);
+            }
+        }
+    }
+
+    private function evidenFiles(Request $request)
+    {
+        $files = $request->file('eviden', []);
+
+        return is_array($files) ? $files : [$files];
+    }
+
+    private function allowedEvidenExtensions()
+    {
         return [
-            'eviden_path' => $file->store('eviden_wfh', 'local'),
-            'eviden_original_name' => $file->getClientOriginalName(),
-            'eviden_mime' => $file->getClientMimeType(),
-            'eviden_size' => $file->getSize(),
+            'jpg', 'jpeg', 'png', 'gif', 'webp',
+            'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt',
         ];
     }
 

@@ -259,6 +259,21 @@
                 font-size: 1.05rem;
                 line-height: 1;
             }
+            .mobile-bottom-nav .bottom-nav-badge {
+                position: absolute;
+                top: 4px;
+                right: 18%;
+                min-width: 18px;
+                height: 18px;
+                padding: 0 5px;
+                border-radius: 999px;
+                background: #dc2626;
+                color: #fff;
+                border: 2px solid #fff;
+                font-size: .62rem;
+                line-height: 14px;
+                text-align: center;
+            }
             .mobile-bottom-nav a.active {
                 background: #ecfdf5;
                 color: var(--primary);
@@ -300,6 +315,15 @@
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
+    @php
+        $approvalPendingCount = 0;
+        if (auth()->check() && auth()->user()->isAtasan()) {
+            $approvalPendingCount = \App\LaporanWfh::whereIn(
+                'user_id',
+                \App\User::where('atasan_id', auth()->id())->pluck('id')
+            )->where('status', 'submitted')->count();
+        }
+    @endphp
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
         <ul class="navbar-nav ml-auto">
@@ -359,7 +383,13 @@
                         <li class="nav-item"><a href="{{ route('atasan.monitoring.index') }}" class="nav-link {{ request()->routeIs('atasan.monitoring.index') ? 'active' : '' }}"><i class="nav-icon fas fa-users"></i><p>Daftar Pegawai</p></a></li>
                         <li class="nav-item">
                             <a href="{{ route('atasan.monitoring.pending') }}" class="nav-link {{ request()->routeIs('atasan.monitoring.pending') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-clock"></i><p>Laporan Pending</p>
+                                <i class="nav-icon fas fa-clock"></i>
+                                <p>
+                                    Laporan Pending
+                                    @if($approvalPendingCount > 0)
+                                        <span class="badge badge-warning right">{{ $approvalPendingCount }}</span>
+                                    @endif
+                                </p>
                             </a>
                         </li>
                     @endif
@@ -439,6 +469,9 @@
             </a>
             <a href="{{ route('atasan.monitoring.pending') }}" class="{{ request()->routeIs('atasan.monitoring.pending') ? 'active' : '' }}">
                 <i class="fas fa-clock"></i>
+                @if($approvalPendingCount > 0)
+                    <span class="bottom-nav-badge">{{ $approvalPendingCount }}</span>
+                @endif
                 <span>Pending</span>
             </a>
         @endif

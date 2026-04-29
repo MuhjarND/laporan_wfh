@@ -31,6 +31,10 @@ class KegiatanWfh extends Model
         });
 
         static::deleting(function ($kegiatan) {
+            foreach ($kegiatan->evidens as $eviden) {
+                $eviden->delete();
+            }
+
             if ($kegiatan->eviden_path) {
                 Storage::disk('local')->delete($kegiatan->eviden_path);
             }
@@ -40,6 +44,33 @@ class KegiatanWfh extends Model
     public function laporan()
     {
         return $this->belongsTo(LaporanWfh::class, 'laporan_id');
+    }
+
+    public function evidens()
+    {
+        return $this->hasMany(KegiatanWfhEviden::class, 'kegiatan_id')->orderBy('id');
+    }
+
+    public function getAllEvidensAttribute()
+    {
+        $evidens = $this->relationLoaded('evidens')
+            ? $this->evidens
+            : $this->evidens()->get();
+
+        if ($evidens->isNotEmpty()) {
+            return $evidens;
+        }
+
+        if (!$this->eviden_path || !$this->eviden_token) {
+            return collect();
+        }
+
+        return collect([(object) [
+            'preview_link' => route('eviden.preview', $this->eviden_token),
+            'embed_url' => route('eviden.file', $this->eviden_token),
+            'original_name' => $this->eviden_original_name,
+            'token' => $this->eviden_token,
+        ]]);
     }
 
     public function getEvidenPreviewLinkAttribute()

@@ -68,20 +68,20 @@
     </div>
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Laporan Terbaru</h3></div>
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Kegiatan Terbaru</h3></div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead><tr><th>Periode</th><th>Kegiatan</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Periode</th></tr></thead>
                     <tbody>
-                        @forelse($recentLaporan as $lap)
+                        @forelse($recentKegiatan as $keg)
                         <tr>
-                            <td><a href="{{ route('pegawai.laporan.show', $lap) }}" style="color:var(--primary);">{{ $lap->periode }}</a></td>
-                            <td>{{ $lap->kegiatan->count() }} kegiatan</td>
-                            <td>{!! $lap->status_badge !!}</td>
+                            <td>{{ $keg->tanggal->format('d/m/Y') }}</td>
+                            <td>{{ Str::limit(strip_tags($keg->kegiatan), 70) }}</td>
+                            <td><a href="{{ route('pegawai.laporan.show', $keg->laporan) }}" style="color:var(--primary);">{{ $keg->laporan->periode }}</a></td>
                         </tr>
                         @empty
-                        <tr><td colspan="3" class="text-center text-muted">Belum ada laporan</td></tr>
+                        <tr><td colspan="3" class="text-center text-muted">Belum ada kegiatan</td></tr>
                         @endforelse
                     </tbody>
                 </table>

@@ -97,8 +97,10 @@
                     <td class="kegiatan"><div class="rich-content">{!! $keg->kegiatan !!}</div></td>
                     <td class="capaian">
                         <div class="rich-content">{!! $keg->capaian !!}</div>
-                        @if($keg->eviden_preview_link)
-                            <br><a href="{{ $keg->eviden_preview_link }}">Lihat Eviden</a>
+                        @if($keg->all_evidens->isNotEmpty())
+                            @foreach($keg->all_evidens as $evidenIndex => $eviden)
+                                <br><a href="{{ $eviden->preview_link }}">Lihat Eviden {{ $evidenIndex + 1 }}</a>
+                            @endforeach
                         @endif
                     </td>
                     <td class="tempat">{{ $keg->tempat_wfh }}</td>

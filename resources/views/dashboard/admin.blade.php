@@ -49,16 +49,20 @@
     </div>
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Laporan Terbaru</h3></div>
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Kegiatan Terbaru</h3></div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                 <table class="table table-hover mb-0">
-                    <thead><tr><th>Pegawai</th><th>Periode</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Pegawai</th><th>Tanggal</th><th>Kegiatan</th></tr></thead>
                     <tbody>
-                        @forelse($recentLaporan as $lap)
-                        <tr><td>{{ $lap->user->name }}</td><td>{{ $lap->periode }}</td><td>{!! $lap->status_badge !!}</td></tr>
+                        @forelse($recentKegiatan as $keg)
+                        <tr>
+                            <td>{{ $keg->laporan->user->name }}</td>
+                            <td>{{ $keg->tanggal->format('d/m/Y') }}</td>
+                            <td>{{ Str::limit(strip_tags($keg->kegiatan), 70) }}</td>
+                        </tr>
                         @empty
-                        <tr><td colspan="3" class="text-center text-muted">Belum ada laporan</td></tr>
+                        <tr><td colspan="3" class="text-center text-muted">Belum ada kegiatan</td></tr>
                         @endforelse
                     </tbody>
                 </table>

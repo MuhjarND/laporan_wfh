@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\User;
 use App\LaporanWfh;
+use App\KegiatanWfh;
 use App\WfhDate;
 
 class DashboardController extends Controller
@@ -36,7 +37,7 @@ class DashboardController extends Controller
         $laporanSubmitted = LaporanWfh::where('status', 'submitted')->count();
         $laporanApproved = LaporanWfh::where('status', 'approved')->count();
         $totalWfhDates = WfhDate::where('is_active', true)->count();
-        $recentLaporan = LaporanWfh::with('user')
+        $recentKegiatan = KegiatanWfh::with('laporan.user')
             ->orderBy('updated_at', 'desc')
             ->take(5)
             ->get();
@@ -44,7 +45,7 @@ class DashboardController extends Controller
         return view('dashboard.admin', compact(
             'totalUsers', 'totalPegawai', 'totalAtasan',
             'totalLaporan', 'laporanSubmitted', 'laporanApproved',
-            'totalWfhDates', 'recentLaporan'
+            'totalWfhDates', 'recentKegiatan'
         ));
     }
 
@@ -63,8 +64,10 @@ class DashboardController extends Controller
             ->count();
         $totalLaporan = LaporanWfh::whereIn('user_id', $bawahanIds)->count();
 
-        $recentLaporan = LaporanWfh::with('user')
-            ->whereIn('user_id', $bawahanIds)
+        $recentKegiatan = KegiatanWfh::with('laporan.user')
+            ->whereHas('laporan', function ($query) use ($bawahanIds) {
+                $query->whereIn('user_id', $bawahanIds);
+            })
             ->orderBy('updated_at', 'desc')
             ->take(10)
             ->get();
@@ -79,16 +82,19 @@ class DashboardController extends Controller
             ->where('tahun', now()->year)
             ->first();
 
-        $recentLaporanSaya = LaporanWfh::where('user_id', $user->id)
+        $recentKegiatanSaya = KegiatanWfh::with('laporan')
+            ->whereHas('laporan', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
             ->orderBy('updated_at', 'desc')
             ->take(5)
             ->get();
 
         return view('dashboard.atasan', compact(
             'totalBawahan', 'laporanSubmitted', 'laporanApproved',
-            'totalLaporan', 'recentLaporan', 'bawahan',
+            'totalLaporan', 'recentKegiatan', 'bawahan',
             'laporanSayaTotal', 'laporanSayaDraft', 'laporanSayaSubmitted',
-            'laporanSayaApproved', 'currentLaporan', 'recentLaporanSaya'
+            'laporanSayaApproved', 'currentLaporan', 'recentKegiatanSaya'
         ));
     }
 
@@ -100,7 +106,10 @@ class DashboardController extends Controller
         $laporanSubmitted = LaporanWfh::where('user_id', $user->id)->where('status', 'submitted')->count();
         $laporanApproved = LaporanWfh::where('user_id', $user->id)->where('status', 'approved')->count();
 
-        $recentLaporan = LaporanWfh::where('user_id', $user->id)
+        $recentKegiatan = KegiatanWfh::with('laporan')
+            ->whereHas('laporan', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
             ->orderBy('updated_at', 'desc')
             ->take(5)
             ->get();
@@ -115,7 +124,7 @@ class DashboardController extends Controller
 
         return view('dashboard.pegawai', compact(
             'totalLaporan', 'laporanDraft', 'laporanSubmitted',
-            'laporanApproved', 'recentLaporan', 'currentLaporan'
+            'laporanApproved', 'recentKegiatan', 'currentLaporan'
         ));
     }
 }

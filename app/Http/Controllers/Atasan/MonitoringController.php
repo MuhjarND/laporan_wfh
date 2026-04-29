@@ -37,7 +37,7 @@ class MonitoringController extends Controller
     public function showLaporan(LaporanWfh $laporan)
     {
         $user = auth()->user();
-        $laporan->load('kegiatan', 'user', 'approver');
+        $laporan->load('kegiatan.evidens', 'user', 'approver');
         if ($laporan->user->atasan_id !== $user->id) {
             abort(403);
         }
@@ -87,7 +87,7 @@ class MonitoringController extends Controller
     {
         $user = auth()->user();
         if ($laporan->user->atasan_id !== $user->id) { abort(403); }
-        $laporan->load('kegiatan', 'user', 'user.atasan');
+        $laporan->load('kegiatan.evidens', 'user', 'user.atasan');
         $isPdf = true;
         $pdf = PDF::loadView('pdf.laporan-wfh', compact('laporan', 'isPdf'));
         $pdf->setPaper('A4', 'portrait');
@@ -99,7 +99,7 @@ class MonitoringController extends Controller
     {
         $user = auth()->user();
         if ($laporan->user->atasan_id !== $user->id) { abort(403); }
-        $laporan->load('kegiatan', 'user', 'user.atasan');
+        $laporan->load('kegiatan.evidens', 'user', 'user.atasan');
         $isPdf = true;
         $pdf = PDF::loadView('pdf.laporan-wfh', compact('laporan', 'isPdf'));
         $pdf->setPaper('A4', 'portrait');

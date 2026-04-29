@@ -17,7 +17,7 @@ class LaporanController extends Controller
 
     public function index(Request $request)
     {
-        $query = LaporanWfh::with('user', 'kegiatan');
+        $query = LaporanWfh::with('user', 'kegiatan.evidens');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -52,7 +52,7 @@ class LaporanController extends Controller
 
     public function preview(LaporanWfh $laporan)
     {
-        $laporan->load('kegiatan', 'user', 'user.atasan');
+        $laporan->load('kegiatan.evidens', 'user', 'user.atasan');
 
         $isPdf = true;
         $pdf = PDF::loadView('pdf.laporan-wfh', compact('laporan', 'isPdf'));
@@ -65,7 +65,7 @@ class LaporanController extends Controller
 
     public function downloadPdf(LaporanWfh $laporan)
     {
-        $laporan->load('kegiatan', 'user', 'user.atasan');
+        $laporan->load('kegiatan.evidens', 'user', 'user.atasan');
 
         $isPdf = true;
         $pdf = PDF::loadView('pdf.laporan-wfh', compact('laporan', 'isPdf'));
@@ -78,7 +78,7 @@ class LaporanController extends Controller
 
     public function downloadAllPdf()
     {
-        $laporans = LaporanWfh::with(['kegiatan', 'user', 'user.atasan'])
+        $laporans = LaporanWfh::with(['kegiatan.evidens', 'user', 'user.atasan'])
             ->orderBy('tahun', 'desc')
             ->orderBy('bulan', 'desc')
             ->orderBy('updated_at', 'desc')

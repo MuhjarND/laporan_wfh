@@ -33,15 +33,17 @@
             <h1 class="title">Preview Eviden WFH</h1>
             <div class="meta">
                 {{ $kegiatan->laporan->user->name ?? '-' }} - {{ $kegiatan->tanggal->format('d/m/Y') }}
-                @if($kegiatan->eviden_original_name)
+                @if($eviden)
+                    - {{ $eviden->original_name }}
+                @elseif($kegiatan->eviden_original_name)
                     - {{ $kegiatan->eviden_original_name }}
                 @endif
             </div>
         </div>
-        <a class="btn" href="{{ route('eviden.file', $kegiatan->eviden_token) }}" target="_blank" rel="noopener">Buka File</a>
+        <a class="btn" href="{{ route('eviden.file', $eviden ? $eviden->token : $kegiatan->eviden_token) }}" target="_blank" rel="noopener">Buka File</a>
     </div>
     <div class="frame-wrap">
-        <iframe src="{{ route('eviden.file', $kegiatan->eviden_token) }}" title="Preview Eviden">
+        <iframe src="{{ route('eviden.file', $eviden ? $eviden->token : $kegiatan->eviden_token) }}" title="Preview Eviden">
             <div class="fallback">
                 Browser tidak dapat menampilkan preview. Gunakan tombol Buka File.
             </div>

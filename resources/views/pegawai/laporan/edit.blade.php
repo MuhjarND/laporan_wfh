@@ -200,8 +200,8 @@
                     <div class="form-group"><label>Capaian / Hasil *</label><textarea name="capaian" id="capaian" class="form-control js-ckeditor" rows="3" required placeholder="Capaian/hasil...">{{ old('capaian') }}</textarea></div>
                     <div class="form-group">
                         <label>Eviden (opsional)</label>
-                        <input type="file" name="eviden" class="form-control-file">
-                        <small class="form-text text-muted">Upload file eviden maksimal 10 MB. Link preview akan dibuat otomatis dari aplikasi.</small>
+                        <input type="file" name="eviden[]" class="form-control-file" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                        <small class="form-text text-muted">Bisa lebih dari 1 file. Maksimal 10 MB per file. File executable seperti PHP tidak diizinkan.</small>
                     </div>
                 </div>
                 <div class="card-footer text-right" style="background:#fafbfc;"><button type="submit" class="btn btn-primary"><i class="fas fa-plus mr-1"></i> Tambah</button></div>
@@ -221,8 +221,14 @@
                                 <td data-label="Kegiatan"><small>{{ Str::limit(strip_tags($keg->kegiatan), 80) }}</small></td>
                                 <td data-label="Capaian">
                                     <small>{{ Str::limit(strip_tags($keg->capaian), 60) }}</small>
-                                    @if($keg->eviden_preview_link)
-                                        <br><a href="{{ $keg->eviden_preview_link }}" target="_blank" rel="noopener" style="font-size:.75rem;color:var(--primary);font-weight:600;"><i class="fas fa-paperclip mr-1"></i>{{ Str::limit($keg->eviden_original_name ?? 'Eviden', 28) }}</a>
+                                    @if($keg->all_evidens->isNotEmpty())
+                                        <div class="mt-1">
+                                            @foreach($keg->all_evidens as $eviden)
+                                                <a href="{{ $eviden->preview_link }}" target="_blank" rel="noopener" class="d-block" style="font-size:.75rem;color:var(--primary);font-weight:600;">
+                                                    <i class="fas fa-paperclip mr-1"></i>{{ Str::limit($eviden->original_name ?? 'Eviden', 28) }}
+                                                </a>
+                                            @endforeach
+                                        </div>
                                     @endif
                                 </td>
                                 <td data-label="Tempat"><small>{{ $keg->tempat_wfh }}</small></td>
@@ -288,8 +294,8 @@
                     <div class="form-group"><label>Capaian</label><textarea name="capaian" id="edit_capaian" class="form-control" rows="3" required></textarea></div>
                     <div class="form-group">
                         <label>Eviden (opsional)</label>
-                        <input type="file" name="eviden" id="edit_eviden" class="form-control-file">
-                        <small class="form-text text-muted">Kosongkan jika tidak ingin mengganti file eviden.</small>
+                        <input type="file" name="eviden[]" id="edit_eviden" class="form-control-file" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                        <small class="form-text text-muted">File baru akan ditambahkan ke eviden yang sudah ada. Maksimal 10 MB per file.</small>
                     </div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Simpan</button></div>

@@ -12,4 +12,9 @@ class WfhDate extends Model
         'tanggal' => 'date',
         'is_active' => 'boolean',
     ];
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'wfh_date_user')->withTimestamps();
+    }
 }

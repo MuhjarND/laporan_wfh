@@ -89,12 +89,7 @@ class LaporanController extends Controller
 
         $laporan->load('kegiatan');
 
-        // Get WFH dates for this month
-        $wfhDates = WfhDate::whereMonth('tanggal', $laporan->bulan)
-            ->whereYear('tanggal', $laporan->tahun)
-            ->where('is_active', true)
-            ->orderBy('tanggal')
-            ->get();
+        $wfhDates = $this->eligibleWfhDatesForUser(auth()->user(), $laporan->bulan, $laporan->tahun);
 
         return view('pegawai.laporan.edit', compact('laporan', 'wfhDates'));
     }
@@ -140,6 +135,12 @@ class LaporanController extends Controller
             'eviden' => 'nullable|file|max:10240',
         ]);
 
+        if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Tanggal WFH tidak tersedia untuk akun Anda.');
+        }
+
         $data = [
             'laporan_id' => $laporan->id,
             'tanggal' => $request->tanggal,
@@ -179,6 +180,12 @@ class LaporanController extends Controller
             'tempat_wfh' => 'required|string|max:255',
             'eviden' => 'nullable|file|max:10240',
         ]);
+
+        if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Tanggal WFH tidak tersedia untuk akun Anda.');
+        }
 
         $data = [
             'tanggal' => $request->tanggal,
@@ -335,5 +342,35 @@ class LaporanController extends Controller
         $clean = strip_tags((string) $html, $allowedTags);
 
         return preg_replace('/<([a-z][a-z0-9]*)\b[^>]*>/i', '<$1>', $clean);
+    }
+
+    private function eligibleWfhDatesForUser($user, $bulan, $tahun)
+    {
+        return WfhDate::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->where('is_active', true)
+            ->where(function ($query) use ($user) {
+                $query->whereDoesntHave('users')
+                    ->orWhereHas('users', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
+            })
+            ->orderBy('tanggal')
+            ->get();
+    }
+
+    private function isEligibleWfhDate($user, $tanggal)
+    {
+        $date = Carbon::parse($tanggal);
+
+        return WfhDate::whereDate('tanggal', $date->toDateString())
+            ->where('is_active', true)
+            ->where(function ($query) use ($user) {
+                $query->whereDoesntHave('users')
+                    ->orWhereHas('users', function ($q) use ($user) {
+                        $q->where('users.id', $user->id);
+                    });
+            })
+            ->exists();
     }
 }

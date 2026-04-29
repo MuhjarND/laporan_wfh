@@ -45,6 +45,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])
     Route::get('laporan', 'Admin\LaporanController@index')->name('laporan.index');
 
     // WFH Date Management
+    Route::get('wfh-dates/monitoring', 'Admin\WfhDateController@monitoring')->name('wfh-dates.monitoring');
+    Route::post('wfh-dates/monitoring/send-all-activity-reminders', 'Admin\WfhDateController@sendAllActivityReminders')->name('wfh-dates.send-all-activity-reminders');
+    Route::post('wfh-dates/monitoring/send-all-submit-reminders', 'Admin\WfhDateController@sendAllSubmitReminders')->name('wfh-dates.send-all-submit-reminders');
+    Route::post('wfh-dates/{wfhDate}/send-reminder', 'Admin\WfhDateController@sendReminder')->name('wfh-dates.send-reminder');
+    Route::post('wfh-dates/{wfhDate}/send-submit-reminder', 'Admin\WfhDateController@sendSubmitReminder')->name('wfh-dates.send-submit-reminder');
     Route::resource('wfh-dates', 'Admin\WfhDateController')->except(['show', 'edit', 'update']);
     Route::post('wfh-dates/{wfhDate}/toggle-active', 'Admin\WfhDateController@toggleActive')->name('wfh-dates.toggle-active');
 });

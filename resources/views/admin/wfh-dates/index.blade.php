@@ -11,6 +11,9 @@
     <div class="card-header d-flex align-items-center">
         <h3 class="card-title"><i class="fas fa-calendar-alt mr-2"></i>Daftar Tanggal WFH</h3>
         <div class="card-tools">
+            <a href="{{ route('admin.wfh-dates.monitoring') }}" class="btn btn-sm btn-success">
+                <i class="fas fa-chart-line mr-1"></i> Monitoring Pelaporan
+            </a>
             <a href="{{ route('admin.wfh-dates.create') }}" class="btn btn-sm btn-primary">
                 <i class="fas fa-plus mr-1"></i> Tambah Tanggal
             </a>
@@ -43,6 +46,7 @@
                         <th>No</th>
                         <th>Tanggal</th>
                         <th>Hari</th>
+                        <th>Pegawai WFH</th>
                         <th>Keterangan</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -57,6 +61,7 @@
                         <td>{{ $wfhDates->firstItem() + $i }}</td>
                         <td>{{ $date->tanggal->format('d/m/Y') }}</td>
                         <td>{{ $hariNames[$date->tanggal->dayOfWeek] }}</td>
+                        <td>{{ $date->users_count > 0 ? $date->users_count . ' pegawai' : 'Semua pegawai aktif' }}</td>
                         <td>{{ $date->keterangan ?? '-' }}</td>
                         <td>
                             @if($date->is_active)
@@ -81,7 +86,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="text-center" style="color: var(--text-muted);">Belum ada tanggal WFH</td></tr>
+                    <tr><td colspan="7" class="text-center" style="color: var(--text-muted);">Belum ada tanggal WFH</td></tr>
                     @endforelse
                 </tbody>
             </table>

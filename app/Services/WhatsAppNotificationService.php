@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\LaporanWfh;
 use App\User;
+use App\WfhDate;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
@@ -149,6 +150,70 @@ class WhatsAppNotificationService
             route('login'),
             '',
             'Demi keamanan akun, mohon menjaga kerahasiaan password dan tidak membagikannya kepada pihak lain.',
+            '',
+            'Terima kasih.',
+            "Wassalamu'alaikum wr wb.",
+            '',
+            '- *Sistem Laporan WFA PTA Papua Barat*',
+        ]);
+
+        return $this->send($user->phone, $message);
+    }
+
+    public function sendWfhReportReminder(User $user, WfhDate $wfhDate)
+    {
+        if (!$user->phone) {
+            return false;
+        }
+
+        $message = implode("\n", [
+            '*[NOTIF LAPWFH]*',
+            '',
+            "Assalamu'alaikum wr wb.",
+            '',
+            'Yth. Bapak/Ibu ' . $user->name . ',',
+            '',
+            'Berdasarkan monitoring Sistem Laporan WFH, Saudara/i tercatat belum mengisi laporan kegiatan WFH untuk tanggal berikut:',
+            '',
+            'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
+            'Keterangan: ' . ($wfhDate->keterangan ?: '-'),
+            '',
+            'Mohon segera mengisi laporan kegiatan melalui tautan berikut:',
+            route('pegawai.laporan.index'),
+            '',
+            'Apabila laporan sudah dibuat, mohon abaikan pesan ini.',
+            '',
+            'Terima kasih.',
+            "Wassalamu'alaikum wr wb.",
+            '',
+            '- *Sistem Laporan WFA PTA Papua Barat*',
+        ]);
+
+        return $this->send($user->phone, $message);
+    }
+
+    public function sendWfhSubmitReminder(User $user, WfhDate $wfhDate)
+    {
+        if (!$user->phone) {
+            return false;
+        }
+
+        $message = implode("\n", [
+            '*[NOTIF LAPWFH]*',
+            '',
+            "Assalamu'alaikum wr wb.",
+            '',
+            'Yth. Bapak/Ibu ' . $user->name . ',',
+            '',
+            'Berdasarkan monitoring Sistem Laporan WFH, Saudara/i tercatat sudah mengisi kegiatan WFH namun belum mengirim/mengajukan laporan kepada atasan.',
+            '',
+            'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
+            'Periode: ' . $wfhDate->tanggal->format('m/Y'),
+            '',
+            'Mohon segera membuka laporan WFH dan menekan tombol Ajukan ke Atasan melalui tautan berikut:',
+            route('pegawai.laporan.index'),
+            '',
+            'Apabila laporan sudah diajukan, mohon abaikan pesan ini.',
             '',
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",

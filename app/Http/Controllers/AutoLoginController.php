@@ -10,9 +10,26 @@ use Illuminate\Support\Facades\Log;
 
 class AutoLoginController extends Controller
 {
-    public function __invoke(Request $request, ChatbotGatewayService $gateway)
+    public function show(Request $request)
     {
         $token = $this->tokenFromRequest($request);
+
+        if ($token === '') {
+            return $this->errorResponse();
+        }
+
+        if (Auth::guard(config('auth.defaults.guard', 'web'))->check()) {
+            return redirect()->route('dashboard');
+        }
+
+        return response()
+            ->view('auth.autologin-continue', compact('token'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    }
+
+    public function login(Request $request, ChatbotGatewayService $gateway)
+    {
+        $token = (string) $request->input('token', '');
 
         if ($token === '') {
             return $this->errorResponse();
@@ -21,10 +38,20 @@ class AutoLoginController extends Controller
         $validation = $gateway->validateMagicToken($token);
 
         if (empty($validation['valid']) || empty($validation['app_user_id'])) {
+            if (Auth::guard(config('auth.defaults.guard', 'web'))->check()) {
+                return redirect()->route('dashboard');
+            }
+
             return $this->errorResponse();
         }
 
         $appUserId = (string) $validation['app_user_id'];
+        Log::info('Chatbot magic login user lookup started', [
+            'app_user_id_hash' => substr(hash('sha256', $appUserId), 0, 16),
+            'app_user_id_length' => strlen($appUserId),
+            'app_user_id_is_numeric' => is_numeric($appUserId),
+        ]);
+
         $user = User::where('app_user_id', $appUserId)
             ->orWhere('id', $appUserId)
             ->orWhere('nip', $appUserId)
@@ -47,6 +74,11 @@ class AutoLoginController extends Controller
         }
 
         $guard = config('auth.defaults.guard', 'web');
+        Log::info('Chatbot magic login user matched', [
+            'user_id' => $user->id,
+            'guard' => $guard,
+        ]);
+
         Auth::guard($guard)->login($user);
         $request->session()->regenerate();
 

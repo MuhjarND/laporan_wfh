@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Route;
 Auth::routes(['register' => false]);
 
 // Chatbot Gateway magic login
-Route::get('/autologin', 'AutoLoginController')->name('autologin');
+Route::get('/autologin', 'AutoLoginController@show')->name('autologin');
+Route::post('/autologin', 'AutoLoginController@login')->name('autologin.login');
 
 // Redirect root to dashboard
 Route::get('/', function () {

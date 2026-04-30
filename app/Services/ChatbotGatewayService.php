@@ -61,6 +61,13 @@ class ChatbotGatewayService
             return ['valid' => false, 'reason' => 'gateway_invalid_payload'];
         }
 
+        Log::info('Chatbot magic login validation succeeded', [
+            'token_hash' => substr(hash('sha256', $token), 0, 16),
+            'app_user_id_hash' => substr(hash('sha256', (string) $appUserId), 0, 16),
+            'app_user_id_length' => strlen((string) $appUserId),
+            'app_user_id_is_numeric' => is_numeric((string) $appUserId),
+        ]);
+
         return [
             'valid' => true,
             'app_user_id' => (string) $appUserId,

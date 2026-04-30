@@ -41,7 +41,7 @@ class AutoLoginTest extends TestCase
                 ->andReturn(['valid' => false]);
         });
 
-        $response = $this->get('/autologin?token=invalid-token');
+        $response = $this->post('/autologin', ['token' => 'invalid-token']);
 
         $response->assertStatus(401);
         $response->assertSee('Link login tidak valid atau sudah kedaluwarsa.');
@@ -62,7 +62,7 @@ class AutoLoginTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/autologin?token=valid-token');
+        $response = $this->post('/autologin', ['token' => 'valid-token']);
 
         $response->assertRedirect(route('dashboard'));
         $this->assertAuthenticatedAs($user, 'web');
@@ -86,7 +86,7 @@ class AutoLoginTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/autologin?token=valid-token');
+        $response = $this->post('/autologin', ['token' => 'valid-token']);
 
         $response->assertRedirect(route('dashboard'));
         $this->assertAuthenticatedAs($user, 'web');
@@ -110,7 +110,7 @@ class AutoLoginTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/autologin?token=valid-token');
+        $response = $this->post('/autologin', ['token' => 'valid-token']);
 
         $response->assertRedirect(route('dashboard'));
         $this->assertAuthenticatedAs($user, 'web');
@@ -128,7 +128,7 @@ class AutoLoginTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/autologin?token=valid-token');
+        $response = $this->post('/autologin', ['token' => 'valid-token']);
 
         $response->assertStatus(401);
         $response->assertSee('Link login tidak valid atau sudah kedaluwarsa.');
@@ -152,10 +152,20 @@ class AutoLoginTest extends TestCase
                 ]);
         });
 
-        $response = $this->get('/autologin?token=valid-token');
+        $response = $this->post('/autologin', ['token' => 'valid-token']);
 
         $response->assertStatus(401);
         $response->assertSee('Link login tidak valid atau sudah kedaluwarsa.');
+        $this->assertGuest('web');
+    }
+
+    public function testAutologinGetWithTokenShowsContinuePage()
+    {
+        $response = $this->get('/autologin?token=valid-token');
+
+        $response->assertStatus(200);
+        $response->assertSee('Menghubungkan Akun');
+        $response->assertSee('valid-token');
         $this->assertGuest('web');
     }
 

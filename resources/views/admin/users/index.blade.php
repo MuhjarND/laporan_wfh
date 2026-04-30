@@ -54,7 +54,7 @@
     <div class="card-header users-card-header">
         <h3 class="card-title"><i class="fas fa-users mr-2"></i>Daftar User</h3>
         <div class="users-header-actions">
-            <form action="{{ route('admin.users.send-credentials') }}" method="POST" onsubmit="return confirm('Kirim username dan password ke seluruh user non-superadmin? Password akan disetel ulang menjadi NIP masing-masing user.');">
+            <form action="{{ route('admin.users.send-credentials') }}" method="POST" onsubmit="return confirm('Kirim username dan password ke seluruh user non-superadmin? Password akan disetel ulang menjadi password unik yang mudah diingat.');">
                 @csrf
                 <button type="submit" class="btn btn-sm btn-success">
                     <i class="fab fa-whatsapp mr-1"></i> Kirim Akun Semua
@@ -129,7 +129,7 @@
                         <td>
                             <div class="users-actions">
                                 @if(!$user->isSuperAdmin())
-                                <form action="{{ route('admin.users.send-credential', $user) }}" method="POST" onsubmit="return confirm('Kirim username dan password ke WhatsApp user ini? Password akan disetel ulang menjadi NIP user.');">
+                                <form action="{{ route('admin.users.send-credential', $user) }}" method="POST" onsubmit="return confirm('Kirim username dan password ke WhatsApp user ini? Password akan disetel ulang menjadi password unik yang mudah diingat.');">
                                     @csrf
                                     <button type="submit" class="btn btn-sm btn-success" title="Kirim Akun via WhatsApp">
                                         <i class="fab fa-whatsapp"></i>

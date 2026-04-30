@@ -60,7 +60,7 @@ class UserController extends Controller
             'atasan_id' => 'nullable|exists:users,id',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'nip' => $request->nip,
             'email' => $request->email,
@@ -73,6 +73,8 @@ class UserController extends Controller
             'atasan_id' => $request->atasan_id,
             'is_active' => true,
         ]);
+
+        $user->update(['app_user_id' => (string) $user->id]);
 
         return redirect()->route('admin.users.index')
             ->with('success', 'User berhasil ditambahkan.');
@@ -143,7 +145,7 @@ class UserController extends Controller
                 ->with('error', 'Akun super admin tidak dapat dikirim melalui fitur ini.');
         }
 
-        $plainPassword = $user->nip;
+        $plainPassword = $this->generateAccountPassword($user);
         $user->update([
             'password' => Hash::make($plainPassword),
         ]);
@@ -159,7 +161,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'Akun berhasil dikirim ke ' . $user->name . '. Password disetel menjadi NIP user.');
+            ->with('success', 'Akun berhasil dikirim ke ' . $user->name . '. Password baru dibuat unik dan mudah diingat.');
     }
 
     public function sendCredentials(WhatsAppNotificationService $whatsApp)
@@ -174,7 +176,7 @@ class UserController extends Controller
         $withoutPhone = 0;
 
         foreach ($users as $user) {
-            $plainPassword = $user->nip;
+            $plainPassword = $this->generateAccountPassword($user);
             $user->update([
                 'password' => Hash::make($plainPassword),
             ]);
@@ -191,8 +193,17 @@ class UserController extends Controller
             }
         }
 
-        $message = 'Akun berhasil diproses. Terkirim: ' . $sent . ', tanpa nomor WA: ' . $withoutPhone . ', gagal kirim: ' . $failed . '. Password user non-superadmin telah disetel menjadi NIP masing-masing.';
+        $message = 'Akun berhasil diproses. Terkirim: ' . $sent . ', tanpa nomor WA: ' . $withoutPhone . ', gagal kirim: ' . $failed . '. Password user non-superadmin telah dibuat unik dan mudah diingat.';
 
         return redirect()->route('admin.users.index')->with('success', $message);
+    }
+
+    private function generateAccountPassword(User $user)
+    {
+        $namePart = strtolower(preg_replace('/[^a-z0-9]/i', '', strtok($user->name, ' ') ?: 'user'));
+        $namePart = substr($namePart, 0, 8) ?: 'user';
+        $nipPart = substr(preg_replace('/\D/', '', $user->nip), -4) ?: str_pad((string) $user->id, 4, '0', STR_PAD_LEFT);
+
+        return 'wfh' . $namePart . $nipPart . $user->id;
     }
 }

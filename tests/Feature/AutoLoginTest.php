@@ -68,6 +68,30 @@ class AutoLoginTest extends TestCase
         $this->assertAuthenticatedAs($user, 'web');
     }
 
+    public function testAutologinCanMatchUserByNipFromGateway()
+    {
+        $user = $this->createUser([
+            'app_user_id' => 'gateway-user-2',
+            'nip' => '199001012020011002',
+            'email' => 'pegawai2@example.test',
+        ]);
+
+        $this->mock(ChatbotGatewayService::class, function ($mock) {
+            $mock->shouldReceive('validateMagicToken')
+                ->once()
+                ->with('valid-token')
+                ->andReturn([
+                    'valid' => true,
+                    'app_user_id' => '199001012020011002',
+                ]);
+        });
+
+        $response = $this->get('/autologin?token=valid-token');
+
+        $response->assertRedirect(route('dashboard'));
+        $this->assertAuthenticatedAs($user, 'web');
+    }
+
     public function testAutologinWithUnknownUserFails()
     {
         $this->mock(ChatbotGatewayService::class, function ($mock) {

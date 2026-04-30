@@ -11,7 +11,7 @@ class AutoLoginController extends Controller
 {
     public function __invoke(Request $request, ChatbotGatewayService $gateway)
     {
-        $token = (string) $request->query('token', '');
+        $token = $this->tokenFromRequest($request);
 
         if ($token === '') {
             return $this->errorResponse();
@@ -23,7 +23,11 @@ class AutoLoginController extends Controller
             return $this->errorResponse();
         }
 
-        $user = User::where('app_user_id', (string) $validation['app_user_id'])->first();
+        $appUserId = (string) $validation['app_user_id'];
+        $user = User::where('app_user_id', $appUserId)
+            ->orWhere('id', $appUserId)
+            ->orWhere('nip', $appUserId)
+            ->first();
 
         if (!$user || !$user->is_active) {
             return $this->errorResponse();
@@ -42,5 +46,24 @@ class AutoLoginController extends Controller
             ->view('auth.autologin-error', [
                 'message' => config('chatbot.autologin_error_message'),
             ], 401);
+    }
+
+    private function tokenFromRequest(Request $request)
+    {
+        $rawQuery = (string) $request->server('QUERY_STRING', '');
+
+        foreach (explode('&', $rawQuery) as $part) {
+            if ($part === '') {
+                continue;
+            }
+
+            [$key, $value] = array_pad(explode('=', $part, 2), 2, '');
+
+            if (rawurldecode($key) === 'token') {
+                return rawurldecode($value);
+            }
+        }
+
+        return (string) $request->query('token', '');
     }
 }

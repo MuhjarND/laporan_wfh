@@ -18,7 +18,7 @@ class ChatbotGatewayService
 
         try {
             $response = Http::timeout(5)
-                ->asForm()
+                ->asJson()
                 ->withHeaders([
                     'X-INTERNAL-API-KEY' => $internalApiKey,
                     'Accept' => 'application/json',
@@ -36,14 +36,21 @@ class ChatbotGatewayService
         }
 
         $data = $response->json() ?: [];
+        $appUserId = data_get($data, 'app_user_id')
+            ?: data_get($data, 'data.app_user_id')
+            ?: data_get($data, 'user.app_user_id')
+            ?: data_get($data, 'data.user.app_user_id');
+        $isValid = data_get($data, 'valid') === true
+            || data_get($data, 'success') === true
+            || data_get($data, 'status') === 'valid';
 
-        if (empty($data['valid']) || empty($data['app_user_id'])) {
+        if (!$isValid || empty($appUserId)) {
             return ['valid' => false];
         }
 
         return [
             'valid' => true,
-            'app_user_id' => (string) $data['app_user_id'],
+            'app_user_id' => (string) $appUserId,
         ];
     }
 }

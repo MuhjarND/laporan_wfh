@@ -6,6 +6,7 @@ use App\Services\ChatbotGatewayService;
 use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AutoLoginController extends Controller
 {
@@ -29,7 +30,19 @@ class AutoLoginController extends Controller
             ->orWhere('nip', $appUserId)
             ->first();
 
-        if (!$user || !$user->is_active) {
+        if (!$user) {
+            Log::warning('Chatbot magic login user not found', [
+                'app_user_id_hash' => substr(hash('sha256', $appUserId), 0, 16),
+            ]);
+
+            return $this->errorResponse();
+        }
+
+        if (!$user->is_active) {
+            Log::warning('Chatbot magic login inactive user', [
+                'user_id' => $user->id,
+            ]);
+
             return $this->errorResponse();
         }
 

@@ -239,7 +239,8 @@
                 border-top: 1px solid var(--border);
                 box-shadow: 0 -8px 24px rgba(15, 23, 42, .12);
             }
-            .mobile-bottom-nav a {
+            .mobile-bottom-nav a,
+            .mobile-bottom-nav button {
                 position: relative;
                 min-width: 0;
                 min-height: 52px;
@@ -251,11 +252,16 @@
                 color: #6b7280;
                 text-decoration: none;
                 border-radius: 8px;
+                border: 0;
+                background: transparent;
                 font-size: .68rem;
                 font-weight: 700;
                 line-height: 1.1;
+                font-family: inherit;
+                cursor: pointer;
             }
-            .mobile-bottom-nav a i {
+            .mobile-bottom-nav a i,
+            .mobile-bottom-nav button i {
                 font-size: 1.05rem;
                 line-height: 1;
             }
@@ -277,6 +283,9 @@
             .mobile-bottom-nav a.active {
                 background: #ecfdf5;
                 color: var(--primary);
+            }
+            .mobile-bottom-nav button.bottom-nav-logout {
+                color: #dc2626;
             }
             .mobile-bottom-nav a.bottom-nav-action {
                 width: 58px;
@@ -417,6 +426,10 @@
                 <i class="fas fa-calendar-alt"></i>
                 <span>WFH</span>
             </a>
+            <button type="submit" form="logout-form" class="bottom-nav-logout" aria-label="Logout" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
         @endif
 
         @if(auth()->user()->isPegawai())
@@ -440,6 +453,10 @@
                 <i class="fas fa-file-alt"></i>
                 <span>Laporan</span>
             </a>
+            <button type="submit" form="logout-form" class="bottom-nav-logout" aria-label="Logout" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
         @endif
 
         @if(auth()->user()->isAtasan())
@@ -474,6 +491,10 @@
                 @endif
                 <span>Pending</span>
             </a>
+            <button type="submit" form="logout-form" class="bottom-nav-logout" aria-label="Logout" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
         @endif
     </nav>
 

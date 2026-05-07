@@ -83,6 +83,50 @@ class WfhDateController extends Controller
             ->with('success', "{$count} tanggal WFH berhasil ditambahkan.");
     }
 
+    public function edit(WfhDate $wfhDate)
+    {
+        $wfhDate->load('users');
+
+        $users = User::whereIn('role', ['pegawai', 'atasan'])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.wfh-dates.edit', compact('wfhDate', 'users'));
+    }
+
+    public function update(Request $request, WfhDate $wfhDate)
+    {
+        $request->validate([
+            'tanggal' => 'required|date|unique:wfh_dates,tanggal,' . $wfhDate->id,
+            'keterangan' => 'nullable|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        $selectedUserIds = User::whereIn('id', $request->user_ids)
+            ->whereIn('role', ['pegawai', 'atasan'])
+            ->pluck('id')
+            ->all();
+
+        if (count($selectedUserIds) !== count(array_unique($request->user_ids))) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Pilihan pegawai WFH tidak valid.');
+        }
+
+        $wfhDate->update([
+            'tanggal' => $request->tanggal,
+            'keterangan' => $request->keterangan,
+            'is_active' => $request->boolean('is_active'),
+        ]);
+        $wfhDate->users()->sync($selectedUserIds);
+
+        return redirect()->route('admin.wfh-dates.index')
+            ->with('success', 'Tanggal WFH berhasil diperbarui.');
+    }
+
     public function destroy(WfhDate $wfhDate)
     {
         $wfhDate->delete();

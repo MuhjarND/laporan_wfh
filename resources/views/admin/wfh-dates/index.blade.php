@@ -72,6 +72,9 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
+                                <a href="{{ route('admin.wfh-dates.edit', $date) }}" class="btn btn-warning" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
                                 <form action="{{ route('admin.wfh-dates.toggle-active', $date) }}" method="POST" class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn {{ $date->is_active ? 'btn-secondary' : 'btn-success' }}">

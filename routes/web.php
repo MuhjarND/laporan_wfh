@@ -54,7 +54,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])
     Route::post('wfh-dates/monitoring/send-all-submit-reminders', 'Admin\WfhDateController@sendAllSubmitReminders')->name('wfh-dates.send-all-submit-reminders');
     Route::post('wfh-dates/{wfhDate}/send-reminder', 'Admin\WfhDateController@sendReminder')->name('wfh-dates.send-reminder');
     Route::post('wfh-dates/{wfhDate}/send-submit-reminder', 'Admin\WfhDateController@sendSubmitReminder')->name('wfh-dates.send-submit-reminder');
-    Route::resource('wfh-dates', 'Admin\WfhDateController')->except(['show', 'edit', 'update']);
+    Route::resource('wfh-dates', 'Admin\WfhDateController')->except(['show']);
     Route::post('wfh-dates/{wfhDate}/toggle-active', 'Admin\WfhDateController@toggleActive')->name('wfh-dates.toggle-active');
 });
 

@@ -39,7 +39,7 @@
                 <div class="card-body">
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Tanda tangan ini akan digunakan untuk menyetujui {{ $totalPending }} laporan pending dari seluruh bawahan Anda.
+                        Tanda tangan ini akan digunakan untuk menyetujui {{ $totalPending }} laporan pending dari seluruh pegawai yang dinilai.
                     </div>
                     <div class="form-group">
                         <label>Catatan (opsional)</label>

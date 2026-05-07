@@ -7,7 +7,7 @@
 <div class="row">
     <div class="col-lg-3 col-6">
         <div class="small-box bg-gradient-success">
-            <div class="inner"><h3>{{ $totalBawahan }}</h3><p>Total Bawahan</p></div>
+            <div class="inner"><h3>{{ $totalBawahan }}</h3><p>Pegawai yang Dinilai</p></div>
             <div class="icon"><i class="fas fa-users"></i></div>
             <a href="{{ route('atasan.monitoring.index') }}" class="small-box-footer">Lihat <i class="fas fa-arrow-circle-right"></i></a>
         </div>
@@ -21,7 +21,7 @@
     </div>
     <div class="col-lg-3 col-6">
         <div class="small-box bg-gradient-info">
-            <div class="inner"><h3>{{ $laporanApproved }}</h3><p>Bawahan Disetujui</p></div>
+            <div class="inner"><h3>{{ $laporanApproved }}</h3><p>Laporan Disetujui</p></div>
             <div class="icon"><i class="fas fa-check-circle"></i></div>
             <a href="{{ route('atasan.monitoring.index') }}" class="small-box-footer">Lihat <i class="fas fa-arrow-circle-right"></i></a>
         </div>
@@ -94,7 +94,7 @@
 <div class="row">
     <div class="col-lg-5">
         <div class="card">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-users mr-2" style="color:var(--primary);"></i>Daftar Bawahan</h3></div>
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-users mr-2" style="color:var(--primary);"></i>Pegawai yang Dinilai</h3></div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                 <table class="table table-hover mb-0">
@@ -115,7 +115,7 @@
     </div>
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Kegiatan Bawahan Terbaru</h3></div>
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Kegiatan Pegawai yang Dinilai Terbaru</h3></div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                 <table class="table table-hover mb-0">

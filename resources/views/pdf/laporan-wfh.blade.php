@@ -4,45 +4,45 @@
     <meta charset="utf-8">
     <title>Laporan WFH - {{ $laporan->user->name }} - {{ $laporan->periode }}</title>
     <style>
-        @page { margin: 1.5cm 2cm 2cm 2cm; }
-        body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.3; color: #000; }
+        @page { margin: 1.2cm 1.7cm 1.35cm 1.7cm; }
+        body { font-family: 'Times New Roman', serif; font-size: 11.5pt; line-height: 1.22; color: #000; }
 
-        .kop-surat { text-align: center; margin-bottom: 15px; }
+        .kop-surat { text-align: center; margin-bottom: 8px; }
         .kop-surat img { width: 100%; max-width: 100%; }
 
-        .judul { text-align: center; margin: 20px 0 15px; }
-        .judul h3, .judul h4 { font-size: 13pt; font-weight: bold; margin: 0; }
+        .judul { text-align: center; margin: 10px 0 8px; }
+        .judul h3, .judul h4 { font-size: 12.5pt; font-weight: bold; margin: 0; }
 
-        .info-pegawai { margin-bottom: 12px; }
+        .info-pegawai { margin-bottom: 6px; }
         .info-pegawai table { width: 100%; }
-        .info-pegawai td { padding: 2px 0; vertical-align: top; }
+        .info-pegawai td { padding: 1px 0; vertical-align: top; }
         .info-pegawai .label { font-weight: bold; width: 210px; white-space: nowrap; }
         .info-pegawai .separator { width: 15px; text-align: center; }
 
-        .tabel-kegiatan { width: 100%; border-collapse: collapse; margin: 12px 0; }
-        .tabel-kegiatan th, .tabel-kegiatan td { border: 1px solid #000; padding: 5px 7px; vertical-align: top; font-size: 11pt; }
+        .tabel-kegiatan { width: 100%; border-collapse: collapse; margin: 7px 0 0; }
+        .tabel-kegiatan th, .tabel-kegiatan td { border: 1px solid #000; padding: 3px 5px; vertical-align: top; font-size: 10.5pt; line-height: 1.2; }
         .tabel-kegiatan th { background: #f0f0f0; text-align: center; font-weight: bold; }
         .tabel-kegiatan .no { text-align: center; width: 5%; }
         .tabel-kegiatan .tanggal { width: 12%; text-align: center; }
         .tabel-kegiatan .kegiatan { width: 33%; }
         .tabel-kegiatan .capaian { width: 30%; }
         .tabel-kegiatan .tempat { width: 20%; text-align: center; }
-        .rich-content p, .rich-content ul, .rich-content ol, .rich-content blockquote { margin: 0 0 4px 0; padding: 0; }
-        .rich-content ul, .rich-content ol { padding-left: 18px; }
+        .rich-content p, .rich-content ul, .rich-content ol, .rich-content blockquote { margin: 0 0 2px 0; padding: 0; }
+        .rich-content ul, .rich-content ol { padding-left: 15px; }
         .rich-content :last-child { margin-bottom: 0; }
 
-        .ttd-section { margin-top: 20px; width: 100%; }
+        .ttd-section { margin-top: 8px; width: 100%; page-break-inside: avoid; break-inside: avoid; }
         .ttd-section table { width: 100%; }
         .ttd-left { width: 40%; vertical-align: top; text-align: left; }
         .ttd-right { width: 60%; vertical-align: top; text-align: right; }
         .ttd-right-inner { text-align: left; display: inline-block; }
-        .ttd-section p { margin: 0; padding: 0; line-height: 1.4; }
+        .ttd-section p { margin: 0; padding: 0; line-height: 1.22; }
         .ttd-name { font-weight: bold; text-decoration: underline; }
-        .ttd-spacer { height: 60px; }
-        .ttd-img { height: 58px; max-width: 180px; object-fit: contain; }
-        .ttd-stack { position: relative; height: 68px; width: 190px; overflow: visible; }
-        .ttd-stack .ttd-img { position: absolute; left: -38px; top: -18px; height: 118px; max-width: 285px; z-index: 2; }
-        .cap-img { position: absolute; left: -24px; top: -34px; height: 172px; max-width: 185px; z-index: 1; opacity: .78; }
+        .ttd-spacer { height: 48px; }
+        .ttd-img { height: 50px; max-width: 170px; object-fit: contain; }
+        .ttd-stack { position: relative; height: 58px; width: 190px; overflow: visible; }
+        .ttd-stack .ttd-img { position: absolute; left: -38px; top: -18px; height: 108px; max-width: 270px; z-index: 2; }
+        .cap-img { position: absolute; left: -24px; top: -38px; height: 164px; max-width: 180px; z-index: 1; opacity: .78; }
     </style>
 </head>
 <body>

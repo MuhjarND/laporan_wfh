@@ -221,6 +221,11 @@ class LaporanController extends Controller
     {
         $this->checkOwnership($laporan);
 
+        if (!$laporan->period_has_ended) {
+            return redirect()->back()
+                ->with('error', 'Laporan ' . $laporan->periode . ' baru dapat diajukan setelah bulan tersebut berakhir.');
+        }
+
         if ($laporan->kegiatan->isEmpty()) {
             return redirect()->back()
                 ->with('error', 'Tidak dapat mengajukan laporan tanpa kegiatan.');

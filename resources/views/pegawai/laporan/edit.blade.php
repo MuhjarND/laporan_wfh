@@ -255,7 +255,13 @@
     <div class="card-body d-flex flex-column flex-md-row align-items-md-center justify-content-between">
         <div class="mb-3 mb-md-0">
             <strong style="color:var(--text-dark);">Laporan {{ $laporan->periode }}</strong>
-            <div class="text-muted" style="font-size:.85rem;">{{ $laporan->kegiatan->count() }} kegiatan siap diajukan ke atasan.</div>
+            @if($laporan->period_has_ended)
+                <div class="text-muted" style="font-size:.85rem;">{{ $laporan->kegiatan->count() }} kegiatan siap diajukan ke atasan.</div>
+            @else
+                <div class="text-muted" style="font-size:.85rem;">
+                    Laporan baru dapat diajukan setelah {{ $laporan->period_ends_at->format('d/m/Y H:i') }}.
+                </div>
+            @endif
         </div>
         <div class="d-flex flex-column flex-sm-row submit-actions" style="gap:8px;">
             <a href="#" class="btn btn-outline-secondary" data-toggle="modal" data-target="#previewModal">
@@ -263,7 +269,7 @@
             </a>
             <form action="{{ route('pegawai.laporan.submit', $laporan) }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-success btn-block">
+                <button type="submit" class="btn btn-success btn-block" {{ $laporan->period_has_ended ? '' : 'disabled' }}>
                     <i class="fas fa-paper-plane mr-1"></i> Ajukan ke Atasan
                 </button>
             </form>

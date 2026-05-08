@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class LaporanWfh extends Model
 {
@@ -61,5 +62,15 @@ class LaporanWfh extends Model
             'rejected' => '<span class="badge badge-danger">Ditolak</span>',
         ];
         return $badges[$this->status] ?? '';
+    }
+
+    public function getPeriodEndsAtAttribute()
+    {
+        return Carbon::create((int) $this->tahun, (int) $this->bulan, 1)->endOfMonth()->endOfDay();
+    }
+
+    public function getPeriodHasEndedAttribute()
+    {
+        return now()->gt($this->period_ends_at);
     }
 }

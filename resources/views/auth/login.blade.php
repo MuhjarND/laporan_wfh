@@ -67,8 +67,25 @@
             transition: all .2s;
         }
         .btn-login:hover { box-shadow: 0 6px 20px rgba(15,76,58,.35); transform: translateY(-1px); }
+        .login-separator {
+            display: flex; align-items: center; gap: 12px; color: #9ca3af;
+            font-size: .78rem; margin: 22px 0;
+        }
+        .login-separator::before,
+        .login-separator::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+        .btn-sso {
+            display: block; width: 100%; padding: 12px; border-radius: 8px;
+            border: 2px solid #0f4c3a; color: #0f4c3a; background: #fff;
+            font-weight: 700; font-size: .95rem; text-align: center; text-decoration: none;
+            transition: all .2s;
+        }
+        .btn-sso:hover { background: #ecfdf5; color: #0a3d2e; text-decoration: none; }
         .alert-error {
             background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
+            border-radius: 8px; padding: 10px 14px; font-size: .85rem; margin-bottom: 20px;
+        }
+        .alert-success {
+            background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;
             border-radius: 8px; padding: 10px 14px; font-size: .85rem; margin-bottom: 20px;
         }
         .invalid-feedback { color: #dc2626; font-size: .78rem; margin-top: 4px; display: block; }
@@ -118,6 +135,9 @@
             @if(session('error'))
                 <div class="alert-error"><i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}</div>
             @endif
+            @if(session('success'))
+                <div class="alert-success"><i class="fas fa-check-circle mr-1"></i> {{ session('success') }}</div>
+            @endif
 
             <form method="POST" action="{{ route('login') }}">
                 @csrf
@@ -143,6 +163,7 @@
                 </div>
                 <button type="submit" class="btn-login"><i class="fas fa-sign-in-alt mr-2"></i>Masuk</button>
             </form>
+
         </div>
     </div>
 </body>

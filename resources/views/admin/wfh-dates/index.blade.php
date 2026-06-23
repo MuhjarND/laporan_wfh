@@ -46,7 +46,9 @@
                         <th>No</th>
                         <th>Tanggal</th>
                         <th>Hari</th>
-                        <th>Pegawai WFH</th>
+                        <th>Pendaftar</th>
+                        <th>Terpilih / Kuota</th>
+                        <th>Surat</th>
                         <th>Keterangan</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -61,7 +63,20 @@
                         <td>{{ $wfhDates->firstItem() + $i }}</td>
                         <td>{{ $date->tanggal->format('d/m/Y') }}</td>
                         <td>{{ $hariNames[$date->tanggal->dayOfWeek] }}</td>
-                        <td>{{ $date->users_count > 0 ? $date->users_count . ' pegawai' : 'Semua pegawai aktif' }}</td>
+                        <td>{{ $date->registrations_count }} pegawai</td>
+                        <td>{{ $date->users_count }} / {{ $quota }} pegawai</td>
+                        <td>
+                            @if($date->letter_status === 'approved')
+                                <span class="badge badge-success d-block mb-1">Terbit</span>
+                                <a href="{{ route('admin.wfh-dates.letter', $date) }}" target="_blank" class="btn btn-xs btn-outline-success">
+                                    <i class="fas fa-file-pdf mr-1"></i> Surat
+                                </a>
+                            @elseif($date->letter_status === 'pending_approval')
+                                <span class="badge badge-warning">Menunggu TTD</span>
+                            @else
+                                <span class="badge badge-secondary">Belum</span>
+                            @endif
+                        </td>
                         <td>{{ $date->keterangan ?? '-' }}</td>
                         <td>
                             @if($date->is_active)
@@ -89,7 +104,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="text-center" style="color: var(--text-muted);">Belum ada tanggal WFH</td></tr>
+                    <tr><td colspan="9" class="text-center" style="color: var(--text-muted);">Belum ada tanggal WFH</td></tr>
                     @endforelse
                 </tbody>
             </table>

@@ -36,4 +36,11 @@ return [
         'country_code' => env('FONNTE_COUNTRY_CODE', '62'),
     ],
 
+    'sso' => [
+        'base_url' => env('SSO_BASE_URL', 'https://sso.pta-papuabarat.go.id'),
+        'client_id' => env('SSO_CLIENT_ID'),
+        'client_secret' => env('SSO_CLIENT_SECRET'),
+        'redirect_uri' => env('SSO_REDIRECT_URI'),
+    ],
+
 ];

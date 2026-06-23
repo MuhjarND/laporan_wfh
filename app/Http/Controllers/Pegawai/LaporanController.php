@@ -141,7 +141,7 @@ class LaporanController extends Controller
         if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Tanggal WFH tidak tersedia untuk akun Anda.');
+                ->with('error', 'Tanggal WFH tidak tersedia atau belum diaktifkan oleh admin.');
         }
 
         $kegiatan = KegiatanWfh::create([
@@ -185,7 +185,7 @@ class LaporanController extends Controller
         if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Tanggal WFH tidak tersedia untuk akun Anda.');
+                ->with('error', 'Tanggal WFH tidak tersedia atau belum diaktifkan oleh admin.');
         }
 
         $data = [
@@ -390,12 +390,6 @@ class LaporanController extends Controller
         return WfhDate::whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->where('is_active', true)
-            ->where(function ($query) use ($user) {
-                $query->whereDoesntHave('users')
-                    ->orWhereHas('users', function ($q) use ($user) {
-                        $q->where('users.id', $user->id);
-                    });
-            })
             ->orderBy('tanggal')
             ->get();
     }
@@ -406,12 +400,6 @@ class LaporanController extends Controller
 
         return WfhDate::whereDate('tanggal', $date->toDateString())
             ->where('is_active', true)
-            ->where(function ($query) use ($user) {
-                $query->whereDoesntHave('users')
-                    ->orWhereHas('users', function ($q) use ($user) {
-                        $q->where('users.id', $user->id);
-                    });
-            })
             ->exists();
     }
 }

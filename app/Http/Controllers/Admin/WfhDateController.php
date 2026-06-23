@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\AppSetting;
 use App\WfhDate;
 use App\User;
 use App\LaporanWfh;
 use App\Services\WhatsAppNotificationService;
+use App\Services\WfhRegistrationService;
+use Barryvdh\DomPDF\Facade as PDF;
+use Carbon\Carbon;
 
 class WfhDateController extends Controller
 {
@@ -16,9 +20,9 @@ class WfhDateController extends Controller
         $this->middleware(['auth', 'role:super_admin']);
     }
 
-    public function index(Request $request)
+    public function index(Request $request, WfhRegistrationService $registrationService)
     {
-        $query = WfhDate::withCount('users');
+        $query = WfhDate::withCount(['users', 'registrations']);
 
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal', $request->bulan);
@@ -29,17 +33,14 @@ class WfhDateController extends Controller
 
         $wfhDates = $query->orderBy('tanggal', 'desc')->paginate(20);
 
-        return view('admin.wfh-dates.index', compact('wfhDates'));
+        $quota = $registrationService->quota();
+
+        return view('admin.wfh-dates.index', compact('wfhDates', 'quota'));
     }
 
     public function create()
     {
-        $users = User::whereIn('role', ['pegawai', 'atasan'])
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        return view('admin.wfh-dates.create', compact('users'));
+        return view('admin.wfh-dates.create');
     }
 
     public function store(Request $request)
@@ -47,36 +48,34 @@ class WfhDateController extends Controller
         $request->validate([
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'nullable|date|after_or_equal:tanggal_mulai',
+            'mode' => 'required|in:friday_range,all_range',
             'keterangan' => 'nullable|string|max:255',
-            'user_ids' => 'required|array|min:1',
-            'user_ids.*' => 'exists:users,id',
         ]);
 
-        $selectedUserIds = User::whereIn('id', $request->user_ids)
-            ->whereIn('role', ['pegawai', 'atasan'])
-            ->pluck('id')
-            ->all();
-
-        if (count($selectedUserIds) !== count(array_unique($request->user_ids))) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Pilihan pegawai WFH tidak valid.');
-        }
-
-        $mulai = \Carbon\Carbon::parse($request->tanggal_mulai);
+        $mulai = Carbon::parse($request->tanggal_mulai);
         $selesai = $request->tanggal_selesai
-            ? \Carbon\Carbon::parse($request->tanggal_selesai)
+            ? Carbon::parse($request->tanggal_selesai)
             : $mulai->copy();
 
         $count = 0;
         while ($mulai->lte($selesai)) {
+            if ($request->mode === 'friday_range' && !$mulai->isFriday()) {
+                $mulai->addDay();
+                continue;
+            }
+
             $wfhDate = WfhDate::updateOrCreate(
                 ['tanggal' => $mulai->toDateString()],
                 ['keterangan' => $request->keterangan, 'is_active' => true]
             );
-            $wfhDate->users()->sync($selectedUserIds);
             $mulai->addDay();
             $count++;
+        }
+
+        if ($count < 1) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Tidak ada tanggal yang dibuat. Pastikan rentang tanggal memuat hari Jumat atau pilih mode semua tanggal.');
         }
 
         return redirect()->route('admin.wfh-dates.index')
@@ -85,43 +84,27 @@ class WfhDateController extends Controller
 
     public function edit(WfhDate $wfhDate)
     {
-        $wfhDate->load('users');
+        $wfhDate->load(['users' => function ($query) {
+            $query->orderBy('name');
+        }, 'registrations.user']);
 
-        $users = User::whereIn('role', ['pegawai', 'atasan'])
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
-
-        return view('admin.wfh-dates.edit', compact('wfhDate', 'users'));
+        return view('admin.wfh-dates.edit', compact('wfhDate'));
     }
 
-    public function update(Request $request, WfhDate $wfhDate)
+    public function update(Request $request, WfhDate $wfhDate, WfhRegistrationService $registrationService)
     {
         $request->validate([
             'tanggal' => 'required|date|unique:wfh_dates,tanggal,' . $wfhDate->id,
             'keterangan' => 'nullable|string|max:255',
             'is_active' => 'nullable|boolean',
-            'user_ids' => 'required|array|min:1',
-            'user_ids.*' => 'exists:users,id',
         ]);
-
-        $selectedUserIds = User::whereIn('id', $request->user_ids)
-            ->whereIn('role', ['pegawai', 'atasan'])
-            ->pluck('id')
-            ->all();
-
-        if (count($selectedUserIds) !== count(array_unique($request->user_ids))) {
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Pilihan pegawai WFH tidak valid.');
-        }
 
         $wfhDate->update([
             'tanggal' => $request->tanggal,
             'keterangan' => $request->keterangan,
             'is_active' => $request->boolean('is_active'),
         ]);
-        $wfhDate->users()->sync($selectedUserIds);
+        $registrationService->recalculateSelection($wfhDate->fresh());
 
         return redirect()->route('admin.wfh-dates.index')
             ->with('success', 'Tanggal WFH berhasil diperbarui.');
@@ -141,6 +124,66 @@ class WfhDateController extends Controller
 
         return redirect()->route('admin.wfh-dates.index')
             ->with('success', 'Status tanggal WFH berhasil diperbarui.');
+    }
+
+    public function publishLetter(Request $request, WfhDate $wfhDate, WhatsAppNotificationService $whatsApp)
+    {
+        $request->validate([
+            'letter_number' => 'required|string|max:255',
+        ]);
+
+        $approver = User::find(AppSetting::value('wfh_letter_approver_user_id'));
+        if (!$approver || !$approver->is_active) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Pejabat approval surat belum diset atau tidak aktif. Silakan set di menu Kelola User.');
+        }
+
+        $selectedUsers = $this->selectedUsersForLetter($wfhDate);
+        if ($selectedUsers->isEmpty()) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Surat tugas belum dapat diterbitkan karena belum ada pegawai yang terpilih.');
+        }
+
+        $wfhDate->update([
+            'letter_number' => $request->letter_number,
+            'letter_status' => 'pending_approval',
+            'letter_requested_at' => now(),
+            'letter_published_at' => null,
+            'letter_approved_at' => null,
+            'letter_approved_by' => null,
+            'letter_signature' => null,
+            'letter_notified_at' => null,
+        ]);
+
+        $wfhDate = $wfhDate->fresh();
+        $approvalNotification = $whatsApp->sendWfhLetterApprovalRequest($approver, $wfhDate);
+
+        return redirect()->back()
+            ->with('success', 'Surat tugas berhasil diajukan ke ' . $approver->name . ' untuk ditandatangani. Notifikasi approval: ' . ($approvalNotification ? 'terkirim' : 'tidak terkirim') . '.');
+    }
+
+    public function downloadLetter(WfhDate $wfhDate)
+    {
+        if (!$wfhDate->letter_number) {
+            return redirect()->back()
+                ->with('error', 'Nomor surat belum diisi.');
+        }
+
+        $users = $this->selectedUsersForLetter($wfhDate);
+        if ($users->isEmpty()) {
+            return redirect()->back()
+                ->with('error', 'Belum ada pegawai terpilih untuk surat tugas ini.');
+        }
+
+        $approver = $wfhDate->letterApprover ?: User::find(AppSetting::value('wfh_letter_approver_user_id'));
+        $pdf = PDF::loadView('pdf.surat-tugas-wfh', compact('wfhDate', 'users', 'approver'))
+            ->setPaper('a4', 'portrait');
+
+        $filename = 'Surat_Tugas_WFH_' . $wfhDate->tanggal->format('Ymd') . '.pdf';
+
+        return $pdf->stream($filename);
     }
 
     public function monitoring(Request $request)
@@ -338,14 +381,54 @@ class WfhDateController extends Controller
             $wfhDate->load('users');
         }
 
-        if ($wfhDate->users->isNotEmpty()) {
-            return $wfhDate->users;
+        return $wfhDate->users;
+    }
+
+    private function selectedUsersForLetter(WfhDate $wfhDate)
+    {
+        $users = $wfhDate->users()->get();
+
+        return $users->sortBy(function ($user) {
+            return sprintf('%03d-%s', $this->jabatanPriority($user), strtolower($user->name));
+        })->values();
+    }
+
+    private function jabatanPriority(User $user)
+    {
+        $jabatan = strtolower((string) $user->jabatan);
+
+        if (strpos($jabatan, 'wakil ketua') !== false) {
+            return 20;
+        }
+        if (strpos($jabatan, 'ketua') !== false) {
+            return 10;
+        }
+        if (strpos($jabatan, 'panitera') !== false && strpos($jabatan, 'pengganti') === false && strpos($jabatan, 'muda') === false) {
+            return 30;
+        }
+        if (strpos($jabatan, 'sekretaris') !== false) {
+            return 31;
+        }
+        if (strpos($jabatan, 'hakim') !== false) {
+            return 40;
+        }
+        if (strpos($jabatan, 'kepala bagian') !== false || strpos($jabatan, 'kabag') !== false) {
+            return 50;
+        }
+        if (strpos($jabatan, 'kepala sub bagian') !== false || strpos($jabatan, 'kasubbag') !== false) {
+            return 60;
+        }
+        if (strpos($jabatan, 'panitera muda') !== false || strpos($jabatan, 'panitera pengganti') !== false) {
+            return 70;
+        }
+        if (strpos($jabatan, 'jurusita') !== false) {
+            return 80;
+        }
+        if (strpos($jabatan, 'pranata') !== false || strpos($jabatan, 'analis') !== false || strpos($jabatan, 'pengelola') !== false || strpos($jabatan, 'bendahara') !== false) {
+            return 90;
         }
 
-        return User::whereIn('role', ['pegawai', 'atasan'])
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        return 100;
     }
 
     private function reportedUserIds(WfhDate $wfhDate)

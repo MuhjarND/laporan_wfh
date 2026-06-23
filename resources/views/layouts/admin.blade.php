@@ -332,6 +332,11 @@
                 \App\User::where('atasan_id', auth()->id())->pluck('id')
             )->where('status', 'submitted')->count();
         }
+        $wfhLetterApproverId = auth()->check() ? (int) \App\AppSetting::value('wfh_letter_approver_user_id') : 0;
+        $isWfhLetterApprover = auth()->check() && $wfhLetterApproverId === (int) auth()->id();
+        $wfhLetterPendingCount = $isWfhLetterApprover
+            ? \App\WfhDate::where('letter_status', 'pending_approval')->whereNotNull('letter_number')->count()
+            : 0;
     @endphp
     <!-- Navbar -->
     <nav class="main-header navbar navbar-expand navbar-white navbar-light">
@@ -346,10 +351,10 @@
                         {{ auth()->user()->name }}<br><small class="text-muted">{{ ucfirst(str_replace('_',' ',auth()->user()->role)) }}</small>
                     </span>
                     <div class="dropdown-divider"></div>
-                    <a href="{{ route('logout') }}" class="dropdown-item" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+                    <a href="{{ session('sso_access_token') ? route('logout.sso') : route('logout') }}" class="dropdown-item" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                         <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
                     </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
+                    <form id="logout-form" action="{{ session('sso_access_token') ? route('logout.sso') : route('logout') }}" method="POST" class="d-none">@csrf</form>
                 </div>
             </li>
         </ul>
@@ -385,6 +390,7 @@
                     @endif
                     @if(auth()->user()->isPegawai() || auth()->user()->isAtasan())
                         <li class="nav-header">LAPORAN</li>
+                        <li class="nav-item"><a href="{{ route('pegawai.wfh-registrations.index') }}" class="nav-link {{ request()->routeIs('pegawai.wfh-registrations.*') ? 'active' : '' }}"><i class="nav-icon fas fa-calendar-check"></i><p>Daftar WFH</p></a></li>
                         <li class="nav-item"><a href="{{ route('pegawai.laporan.index') }}" class="nav-link {{ request()->routeIs('pegawai.laporan.*') ? 'active' : '' }}"><i class="nav-icon fas fa-file-alt"></i><p>Laporan WFH</p></a></li>
                     @endif
                     @if(auth()->user()->isAtasan())
@@ -397,6 +403,20 @@
                                     Laporan Pending
                                     @if($approvalPendingCount > 0)
                                         <span class="badge badge-warning right">{{ $approvalPendingCount }}</span>
+                                    @endif
+                                </p>
+                            </a>
+                        </li>
+                    @endif
+                    @if($isWfhLetterApprover)
+                        <li class="nav-header">APPROVAL</li>
+                        <li class="nav-item">
+                            <a href="{{ route('wfh-letter-approvals.index') }}" class="nav-link {{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-file-signature"></i>
+                                <p>
+                                    Approval Surat
+                                    @if($wfhLetterPendingCount > 0)
+                                        <span class="badge badge-warning right">{{ $wfhLetterPendingCount }}</span>
                                     @endif
                                 </p>
                             </a>
@@ -418,6 +438,15 @@
                 <i class="fas fa-users-cog"></i>
                 <span>User</span>
             </a>
+            @if($isWfhLetterApprover)
+                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                    <i class="fas fa-file-signature"></i>
+                    @if($wfhLetterPendingCount > 0)
+                        <span class="bottom-nav-badge">{{ $wfhLetterPendingCount }}</span>
+                    @endif
+                    <span>Approval</span>
+                </a>
+            @endif
             <a href="{{ route('admin.laporan.index') }}" class="{{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
                 <i class="fas fa-file-alt"></i>
                 <span>Laporan</span>
@@ -433,6 +462,15 @@
         @endif
 
         @if(auth()->user()->isPegawai())
+            @if($isWfhLetterApprover)
+                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                    <i class="fas fa-file-signature"></i>
+                    @if($wfhLetterPendingCount > 0)
+                        <span class="bottom-nav-badge">{{ $wfhLetterPendingCount }}</span>
+                    @endif
+                    <span>Approval</span>
+                </a>
+            @endif
             @php
                 $mobileCurrentLaporan = \App\LaporanWfh::where('user_id', auth()->id())
                     ->where('bulan', now()->month)
@@ -453,6 +491,10 @@
                 <i class="fas fa-file-alt"></i>
                 <span>Laporan</span>
             </a>
+            <a href="{{ route('pegawai.wfh-registrations.index') }}" class="{{ request()->routeIs('pegawai.wfh-registrations.*') ? 'active' : '' }}">
+                <i class="fas fa-calendar-check"></i>
+                <span>Daftar</span>
+            </a>
             <button type="submit" form="logout-form" class="bottom-nav-logout" aria-label="Logout" title="Logout">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
@@ -460,6 +502,15 @@
         @endif
 
         @if(auth()->user()->isAtasan())
+            @if($isWfhLetterApprover)
+                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                    <i class="fas fa-file-signature"></i>
+                    @if($wfhLetterPendingCount > 0)
+                        <span class="bottom-nav-badge">{{ $wfhLetterPendingCount }}</span>
+                    @endif
+                    <span>Approval</span>
+                </a>
+            @endif
             <a href="{{ route('atasan.monitoring.index') }}" class="{{ request()->routeIs('atasan.monitoring.index') ? 'active' : '' }}">
                 <i class="fas fa-users"></i>
                 <span>Pegawai</span>
@@ -483,6 +534,10 @@
             <a href="{{ route('pegawai.laporan.index') }}" class="{{ (request()->routeIs('pegawai.laporan.index') || request()->routeIs('pegawai.laporan.show')) ? 'active' : '' }}">
                 <i class="fas fa-file-alt"></i>
                 <span>Laporan</span>
+            </a>
+            <a href="{{ route('pegawai.wfh-registrations.index') }}" class="{{ request()->routeIs('pegawai.wfh-registrations.*') ? 'active' : '' }}">
+                <i class="fas fa-calendar-check"></i>
+                <span>Daftar</span>
             </a>
             <a href="{{ route('atasan.monitoring.pending') }}" class="{{ request()->routeIs('atasan.monitoring.pending') ? 'active' : '' }}">
                 <i class="fas fa-clock"></i>

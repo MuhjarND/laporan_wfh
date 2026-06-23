@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\LaporanWfh;
+use App\AppSetting;
 use App\User;
 use App\WfhDate;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 
 class WhatsAppNotificationService
 {
@@ -57,7 +59,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFA PTA Papua Barat*',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
         ]);
 
         return $this->send($atasan->phone, $message);
@@ -90,7 +92,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFA PTA Papua Barat*',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
         ]);
 
         return $this->send($laporan->user->phone, $message);
@@ -122,7 +124,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFA PTA Papua Barat*',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
         ]);
 
         return $this->send($laporan->user->phone, $message);
@@ -154,7 +156,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFA PTA Papua Barat*',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);
@@ -186,7 +188,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFA PTA Papua Barat*',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);
@@ -218,7 +220,115 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFA PTA Papua Barat*',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
+        ]);
+
+        return $this->send($user->phone, $message);
+    }
+
+    public function sendWfhAssignmentLetterPublished(User $user, WfhDate $wfhDate)
+    {
+        if (!$user->phone) {
+            return false;
+        }
+
+        $accessUrl = URL::temporarySignedRoute(
+            'wfh-letter-link.open',
+            now()->addDays(14),
+            ['wfhDate' => $wfhDate->id, 'user' => $user->id, 'type' => 'letter']
+        );
+
+        $message = implode("\n", [
+            '*[NOTIF LAPWFH]*',
+            '',
+            "Assalamu'alaikum wr wb.",
+            '',
+            'Yth. Bapak/Ibu ' . $user->name . ',',
+            '',
+            'Surat tugas pelaksanaan WFH Saudara/i telah diterbitkan.',
+            '',
+            'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
+            'Nomor Surat: ' . ($wfhDate->letter_number ?: '-'),
+            'Keterangan: ' . ($wfhDate->keterangan ?: '-'),
+            '',
+            'Silakan mengunduh surat tugas melalui tautan berikut:',
+            $accessUrl,
+            '',
+            'Terima kasih.',
+            "Wassalamu'alaikum wr wb.",
+            '',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
+        ]);
+
+        return $this->send($user->phone, $message);
+    }
+
+    public function sendWfhLetterApprovalRequest(User $approver, WfhDate $wfhDate)
+    {
+        if (!$approver->phone) {
+            return false;
+        }
+
+        $wfhDate->loadCount(['registrations', 'selectedRegistrations']);
+
+        $message = implode("\n", [
+            '*[NOTIF LAPWFH]*',
+            '',
+            "Assalamu'alaikum wr wb.",
+            '',
+            'Yth. Bapak/Ibu ' . $approver->name . ',',
+            '',
+            'Terdapat surat tugas WFH yang memerlukan pemeriksaan dan tanda tangan.',
+            '',
+            'Nomor Surat: ' . ($wfhDate->letter_number ?: '-'),
+            'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
+            'Pegawai Terpilih: ' . $wfhDate->selected_registrations_count . ' pegawai',
+            'Total Pendaftar: ' . $wfhDate->registrations_count . ' pegawai',
+            '',
+            'Silakan melakukan preview dan tanda tangan melalui tautan berikut:',
+            route('wfh-letter-approvals.show', $wfhDate),
+            '',
+            'Terima kasih.',
+            "Wassalamu'alaikum wr wb.",
+            '',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
+        ]);
+
+        return $this->send($approver->phone, $message);
+    }
+
+    public function sendWfhAssignmentNotSelected(User $user, WfhDate $wfhDate, $reason = null)
+    {
+        if (!$user->phone) {
+            return false;
+        }
+
+        $accessUrl = URL::temporarySignedRoute(
+            'wfh-letter-link.open',
+            now()->addDays(14),
+            ['wfhDate' => $wfhDate->id, 'user' => $user->id, 'type' => 'status']
+        );
+
+        $message = implode("\n", [
+            '*[NOTIF LAPWFH]*',
+            '',
+            "Assalamu'alaikum wr wb.",
+            '',
+            'Yth. Bapak/Ibu ' . $user->name . ',',
+            '',
+            'Berdasarkan hasil seleksi sistem, Saudara/i belum terpilih sebagai peserta WFH pada tanggal berikut:',
+            '',
+            'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
+            'Nomor Surat: ' . ($wfhDate->letter_number ?: '-'),
+            'Alasan: ' . ($reason ?: 'Kuota WFH tanggal ini sudah terpenuhi.'),
+            '',
+            'Silakan melihat status pendaftaran melalui tautan berikut:',
+            $accessUrl,
+            '',
+            'Terima kasih.',
+            "Wassalamu'alaikum wr wb.",
+            '',
+            '- *Sistem Laporan WFH PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);
@@ -226,6 +336,12 @@ class WhatsAppNotificationService
 
     public function send($phone, $message)
     {
+        if (!$this->notificationsEnabled()) {
+            Log::info('Pengiriman notifikasi WhatsApp dilewati karena notifikasi WA sedang dinonaktifkan.');
+
+            return false;
+        }
+
         $target = $this->normalizePhone($phone);
 
         if (!$target || !$this->token || !$this->endpoint) {
@@ -290,5 +406,10 @@ class WhatsAppNotificationService
         }
 
         return $phone;
+    }
+
+    public function notificationsEnabled()
+    {
+        return AppSetting::bool('wa_notifications_enabled', true);
     }
 }

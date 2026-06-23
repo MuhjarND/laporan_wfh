@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\AppSetting;
 use App\User;
 use App\Services\WhatsAppNotificationService;
 use Illuminate\Support\Facades\Hash;
@@ -35,8 +36,14 @@ class UserController extends Controller
 
         $users = $query->orderBy('name')->paginate(15);
         $atasanList = User::where('role', 'atasan')->orderBy('name')->get();
+        $waNotificationsEnabled = AppSetting::bool('wa_notifications_enabled', true);
+        $letterApproverId = AppSetting::value('wfh_letter_approver_user_id');
+        $letterApproverList = User::whereIn('role', ['atasan', 'super_admin'])
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.users.index', compact('users', 'atasanList'));
+        return view('admin.users.index', compact('users', 'atasanList', 'waNotificationsEnabled', 'letterApproverId', 'letterApproverList'));
     }
 
     public function create()
@@ -138,8 +145,39 @@ class UserController extends Controller
             ->with('success', 'Status user berhasil diperbarui.');
     }
 
+    public function toggleWaNotifications()
+    {
+        $enabled = AppSetting::bool('wa_notifications_enabled', true);
+        AppSetting::set('wa_notifications_enabled', !$enabled);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Notifikasi WhatsApp berhasil ' . ($enabled ? 'dinonaktifkan' : 'diaktifkan') . '.');
+    }
+
+    public function updateLetterApprover(Request $request)
+    {
+        $request->validate([
+            'approver_user_id' => 'required|exists:users,id',
+        ]);
+
+        $approver = User::where('id', $request->approver_user_id)
+            ->whereIn('role', ['atasan', 'super_admin'])
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        AppSetting::set('wfh_letter_approver_user_id', $approver->id);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Approval surat tugas WFH diset ke ' . $approver->name . '.');
+    }
+
     public function sendCredential(User $user, WhatsAppNotificationService $whatsApp)
     {
+        if (!$whatsApp->notificationsEnabled()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Notifikasi WhatsApp sedang nonaktif. Aktifkan kembali sebelum mengirim akun.');
+        }
+
         if ($user->isSuperAdmin()) {
             return redirect()->route('admin.users.index')
                 ->with('error', 'Akun super admin tidak dapat dikirim melalui fitur ini.');
@@ -166,6 +204,11 @@ class UserController extends Controller
 
     public function sendCredentials(WhatsAppNotificationService $whatsApp)
     {
+        if (!$whatsApp->notificationsEnabled()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Notifikasi WhatsApp sedang nonaktif. Aktifkan kembali sebelum mengirim akun.');
+        }
+
         $users = User::where('role', '!=', 'super_admin')
             ->where('is_active', true)
             ->orderBy('name')

@@ -32,4 +32,14 @@ class LoginController extends Controller
     {
         return 'nip';
     }
+
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    public function showLocalLoginForm()
+    {
+        return view('auth.login');
+    }
 }

@@ -54,9 +54,16 @@
     <div class="card-header users-card-header">
         <h3 class="card-title"><i class="fas fa-users mr-2"></i>Daftar User</h3>
         <div class="users-header-actions">
+            <form action="{{ route('admin.users.toggle-wa-notifications') }}" method="POST" onsubmit="return confirm('{{ $waNotificationsEnabled ? 'Nonaktifkan seluruh notifikasi WhatsApp aplikasi?' : 'Aktifkan kembali seluruh notifikasi WhatsApp aplikasi?' }}');">
+                @csrf
+                <button type="submit" class="btn btn-sm {{ $waNotificationsEnabled ? 'btn-outline-danger' : 'btn-outline-success' }}">
+                    <i class="fas {{ $waNotificationsEnabled ? 'fa-bell-slash' : 'fa-bell' }} mr-1"></i>
+                    {{ $waNotificationsEnabled ? 'Nonaktifkan WA' : 'Aktifkan WA' }}
+                </button>
+            </form>
             <form action="{{ route('admin.users.send-credentials') }}" method="POST" onsubmit="return confirm('Kirim username dan password ke seluruh user non-superadmin? Password akan disetel ulang menjadi password unik yang mudah diingat.');">
                 @csrf
-                <button type="submit" class="btn btn-sm btn-success">
+                <button type="submit" class="btn btn-sm btn-success" {{ !$waNotificationsEnabled ? 'disabled' : '' }}>
                     <i class="fab fa-whatsapp mr-1"></i> Kirim Akun Semua
                 </button>
             </form>
@@ -66,6 +73,38 @@
         </div>
     </div>
     <div class="card-body">
+        <div class="alert {{ $waNotificationsEnabled ? 'alert-success' : 'alert-warning' }}">
+            <i class="fas {{ $waNotificationsEnabled ? 'fa-bell' : 'fa-bell-slash' }} mr-1"></i>
+            Notifikasi WhatsApp saat ini:
+            <strong>{{ $waNotificationsEnabled ? 'Aktif' : 'Nonaktif' }}</strong>.
+            @if(!$waNotificationsEnabled)
+                Seluruh pengiriman WhatsApp dari aplikasi sedang dimatikan.
+            @endif
+        </div>
+
+        <form action="{{ route('admin.users.update-letter-approver') }}" method="POST" class="mb-3">
+            @csrf
+            <div class="row align-items-end">
+                <div class="col-md-5">
+                    <label>Approval Surat Tugas WFH</label>
+                    <select name="approver_user_id" class="form-control @error('approver_user_id') is-invalid @enderror" required>
+                        <option value="">Pilih pejabat approval</option>
+                        @foreach($letterApproverList as $approver)
+                            <option value="{{ $approver->id }}" {{ (string) $letterApproverId === (string) $approver->id ? 'selected' : '' }}>
+                                {{ $approver->name }} - {{ $approver->jabatan ?: ucfirst($approver->role) }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('approver_user_id')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+                <div class="col-md-2 mt-2 mt-md-0">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-save mr-1"></i> Simpan
+                    </button>
+                </div>
+            </div>
+        </form>
+
         <form action="{{ route('admin.users.index') }}" method="GET" class="mb-3">
             <div class="row">
                 <div class="col-md-4">
@@ -131,7 +170,7 @@
                                 @if(!$user->isSuperAdmin())
                                 <form action="{{ route('admin.users.send-credential', $user) }}" method="POST" onsubmit="return confirm('Kirim username dan password ke WhatsApp user ini? Password akan disetel ulang menjadi password unik yang mudah diingat.');">
                                     @csrf
-                                    <button type="submit" class="btn btn-sm btn-success" title="Kirim Akun via WhatsApp">
+                                    <button type="submit" class="btn btn-sm btn-success" title="Kirim Akun via WhatsApp" {{ !$waNotificationsEnabled ? 'disabled' : '' }}>
                                         <i class="fab fa-whatsapp"></i>
                                     </button>
                                 </form>

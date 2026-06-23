@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Route;
 // Authentication Routes
 Auth::routes(['register' => false]);
 
+Route::get('/login/local', 'Auth\LoginController@showLocalLoginForm')->name('login.local');
+Route::get('/login/sso', 'Auth\SsoLoginController@redirect')->name('login.sso');
+Route::get('/auth/sso/callback', 'Auth\SsoLoginController@callback')->name('login.sso.callback');
+Route::post('/logout/sso', 'Auth\SsoLoginController@logout')->name('logout.sso');
+
 // Chatbot Gateway magic login
 Route::get('/autologin', 'AutoLoginController@show')->name('autologin');
 Route::post('/autologin', 'AutoLoginController@login')->name('autologin.login');
@@ -24,13 +29,27 @@ Route::get('/', function () {
 Route::get('/eviden/{token}', 'EvidenController@preview')->name('eviden.preview');
 Route::get('/eviden/{token}/file', 'EvidenController@file')->name('eviden.file');
 
+// Signed WhatsApp links for WFH letter/status access. Valid signature logs the target user in.
+Route::get('/wfh-letter-link/{wfhDate}/{user}/{type}', 'WfhLetterLinkController@open')
+    ->where('type', 'letter|status')
+    ->name('wfh-letter-link.open');
+
 // Dashboard
-Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
+Route::get('/dashboard', 'DashboardController@index')
+    ->name('dashboard')
+    ->middleware(['auth', 'sso.permission:wfh.dashboard.view']);
 
 // Notifications
 Route::get('/notifications', 'NotificationController@index')->name('notifications.index');
 Route::post('/notifications/{id}/read', 'NotificationController@markAsRead')->name('notifications.read');
 Route::post('/notifications/read-all', 'NotificationController@markAllAsRead')->name('notifications.read-all');
+
+Route::prefix('wfh-letter-approvals')->name('wfh-letter-approvals.')->middleware(['auth'])->group(function () {
+    Route::get('/', 'WfhLetterApprovalController@index')->name('index');
+    Route::get('{wfhDate}', 'WfhLetterApprovalController@show')->name('show');
+    Route::get('{wfhDate}/pdf', 'WfhLetterApprovalController@pdf')->name('pdf');
+    Route::post('{wfhDate}/sign', 'WfhLetterApprovalController@sign')->name('sign');
+});
 
 // ==========================================
 // SUPER ADMIN ROUTES
@@ -38,6 +57,8 @@ Route::post('/notifications/read-all', 'NotificationController@markAllAsRead')->
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
     // User Management
     Route::post('users/send-credentials', 'Admin\UserController@sendCredentials')->name('users.send-credentials');
+    Route::post('users/toggle-wa-notifications', 'Admin\UserController@toggleWaNotifications')->name('users.toggle-wa-notifications');
+    Route::post('users/letter-approver', 'Admin\UserController@updateLetterApprover')->name('users.update-letter-approver');
     Route::resource('users', 'Admin\UserController');
     Route::post('users/{user}/send-credential', 'Admin\UserController@sendCredential')->name('users.send-credential');
     Route::post('users/{user}/toggle-active', 'Admin\UserController@toggleActive')->name('users.toggle-active');
@@ -54,6 +75,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])
     Route::post('wfh-dates/monitoring/send-all-submit-reminders', 'Admin\WfhDateController@sendAllSubmitReminders')->name('wfh-dates.send-all-submit-reminders');
     Route::post('wfh-dates/{wfhDate}/send-reminder', 'Admin\WfhDateController@sendReminder')->name('wfh-dates.send-reminder');
     Route::post('wfh-dates/{wfhDate}/send-submit-reminder', 'Admin\WfhDateController@sendSubmitReminder')->name('wfh-dates.send-submit-reminder');
+    Route::post('wfh-dates/{wfhDate}/publish-letter', 'Admin\WfhDateController@publishLetter')->name('wfh-dates.publish-letter');
+    Route::get('wfh-dates/{wfhDate}/letter', 'Admin\WfhDateController@downloadLetter')->name('wfh-dates.letter');
     Route::resource('wfh-dates', 'Admin\WfhDateController')->except(['show']);
     Route::post('wfh-dates/{wfhDate}/toggle-active', 'Admin\WfhDateController@toggleActive')->name('wfh-dates.toggle-active');
 });
@@ -62,6 +85,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])
 // PEGAWAI ROUTES
 // ==========================================
 Route::prefix('pegawai')->name('pegawai.')->middleware(['auth', 'role:pegawai,atasan'])->group(function () {
+    Route::get('wfh-registrations', 'Pegawai\WfhRegistrationController@index')->name('wfh-registrations.index');
+    Route::post('wfh-registrations/{wfhDate}', 'Pegawai\WfhRegistrationController@store')->name('wfh-registrations.store');
+    Route::get('wfh-registrations/{wfhDate}/letter', 'Pegawai\WfhRegistrationController@letter')->name('wfh-registrations.letter');
     Route::get('laporan/download/all-pdf', 'Pegawai\LaporanController@downloadAllPdf')->name('laporan.download-all-pdf');
     Route::resource('laporan', 'Pegawai\LaporanController');
     Route::post('laporan/{laporan}/kegiatan', 'Pegawai\LaporanController@addKegiatan')->name('laporan.add-kegiatan');

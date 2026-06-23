@@ -11,7 +11,7 @@ class User extends Authenticatable
     use Notifiable;
 
     protected $fillable = [
-        'app_user_id', 'name', 'nip', 'email', 'phone', 'password', 'role',
+        'app_user_id', 'sso_id', 'name', 'nip', 'email', 'phone', 'password', 'role',
         'pangkat', 'jabatan', 'satuan_kerja', 'atasan_id', 'avatar', 'is_active',
     ];
 
@@ -38,6 +38,11 @@ class User extends Authenticatable
     public function laporanWfh()
     {
         return $this->hasMany(LaporanWfh::class);
+    }
+
+    public function wfhRegistrations()
+    {
+        return $this->hasMany(WfhRegistration::class);
     }
 
     // Role helpers

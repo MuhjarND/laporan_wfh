@@ -393,20 +393,30 @@
                         <li class="nav-item"><a href="{{ route('pegawai.wfh-registrations.index') }}" class="nav-link {{ request()->routeIs('pegawai.wfh-registrations.*') ? 'active' : '' }}"><i class="nav-icon fas fa-calendar-check"></i><p>Daftar WFH</p></a></li>
                         <li class="nav-item"><a href="{{ route('pegawai.laporan.index') }}" class="nav-link {{ request()->routeIs('pegawai.laporan.*') ? 'active' : '' }}"><i class="nav-icon fas fa-file-alt"></i><p>Laporan WFH</p></a></li>
                     @endif
-                    @if(auth()->user()->isAtasan())
+                    @if(auth()->user()->isAtasan() || $isWfhLetterApprover)
                         <li class="nav-header">MONITORING</li>
-                        <li class="nav-item"><a href="{{ route('atasan.monitoring.index') }}" class="nav-link {{ request()->routeIs('atasan.monitoring.index') ? 'active' : '' }}"><i class="nav-icon fas fa-users"></i><p>Daftar Pegawai</p></a></li>
-                        <li class="nav-item">
-                            <a href="{{ route('atasan.monitoring.pending') }}" class="nav-link {{ request()->routeIs('atasan.monitoring.pending') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-clock"></i>
-                                <p>
-                                    Laporan Pending
-                                    @if($approvalPendingCount > 0)
-                                        <span class="badge badge-warning right">{{ $approvalPendingCount }}</span>
-                                    @endif
-                                </p>
-                            </a>
-                        </li>
+                        @if(auth()->user()->isAtasan())
+                            <li class="nav-item"><a href="{{ route('atasan.monitoring.index') }}" class="nav-link {{ request()->routeIs('atasan.monitoring.index') ? 'active' : '' }}"><i class="nav-icon fas fa-users"></i><p>Daftar Pegawai</p></a></li>
+                            <li class="nav-item">
+                                <a href="{{ route('atasan.monitoring.pending') }}" class="nav-link {{ request()->routeIs('atasan.monitoring.pending') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-clock"></i>
+                                    <p>
+                                        Laporan Pending
+                                        @if($approvalPendingCount > 0)
+                                            <span class="badge badge-warning right">{{ $approvalPendingCount }}</span>
+                                        @endif
+                                    </p>
+                                </a>
+                            </li>
+                        @endif
+                        @if($isWfhLetterApprover)
+                            <li class="nav-item">
+                                <a href="{{ route('wfh-letter-approvals.monitoring') }}" class="nav-link {{ request()->routeIs('wfh-letter-approvals.monitoring', 'wfh-letter-approvals.report') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-chart-line"></i>
+                                    <p>Monitoring Laporan</p>
+                                </a>
+                            </li>
+                        @endif
                     @endif
                     @if($isWfhLetterApprover)
                         <li class="nav-header">APPROVAL</li>
@@ -419,12 +429,6 @@
                                         <span class="badge badge-warning right">{{ $wfhLetterPendingCount }}</span>
                                     @endif
                                 </p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('wfh-letter-approvals.monitoring') }}" class="nav-link {{ request()->routeIs('wfh-letter-approvals.monitoring', 'wfh-letter-approvals.report') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-chart-line"></i>
-                                <p>Monitoring Laporan</p>
                             </a>
                         </li>
                     @endif

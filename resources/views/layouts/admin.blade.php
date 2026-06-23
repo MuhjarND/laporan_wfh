@@ -411,7 +411,7 @@
                     @if($isWfhLetterApprover)
                         <li class="nav-header">APPROVAL</li>
                         <li class="nav-item">
-                            <a href="{{ route('wfh-letter-approvals.index') }}" class="nav-link {{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                            <a href="{{ route('wfh-letter-approvals.index') }}" class="nav-link {{ request()->routeIs('wfh-letter-approvals.index', 'wfh-letter-approvals.show', 'wfh-letter-approvals.pdf', 'wfh-letter-approvals.sign') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-file-signature"></i>
                                 <p>
                                     Approval Surat
@@ -419,6 +419,12 @@
                                         <span class="badge badge-warning right">{{ $wfhLetterPendingCount }}</span>
                                     @endif
                                 </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('wfh-letter-approvals.monitoring') }}" class="nav-link {{ request()->routeIs('wfh-letter-approvals.monitoring', 'wfh-letter-approvals.report') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-chart-line"></i>
+                                <p>Monitoring Laporan</p>
                             </a>
                         </li>
                     @endif
@@ -439,7 +445,7 @@
                 <span>User</span>
             </a>
             @if($isWfhLetterApprover)
-                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.index', 'wfh-letter-approvals.show', 'wfh-letter-approvals.pdf', 'wfh-letter-approvals.sign') ? 'active' : '' }}">
                     <i class="fas fa-file-signature"></i>
                     @if($wfhLetterPendingCount > 0)
                         <span class="bottom-nav-badge">{{ $wfhLetterPendingCount }}</span>
@@ -463,7 +469,7 @@
 
         @if(auth()->user()->isPegawai())
             @if($isWfhLetterApprover)
-                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.index', 'wfh-letter-approvals.show', 'wfh-letter-approvals.pdf', 'wfh-letter-approvals.sign') ? 'active' : '' }}">
                     <i class="fas fa-file-signature"></i>
                     @if($wfhLetterPendingCount > 0)
                         <span class="bottom-nav-badge">{{ $wfhLetterPendingCount }}</span>
@@ -503,7 +509,7 @@
 
         @if(auth()->user()->isAtasan())
             @if($isWfhLetterApprover)
-                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.*') ? 'active' : '' }}">
+                <a href="{{ route('wfh-letter-approvals.index') }}" class="{{ request()->routeIs('wfh-letter-approvals.index', 'wfh-letter-approvals.show', 'wfh-letter-approvals.pdf', 'wfh-letter-approvals.sign') ? 'active' : '' }}">
                     <i class="fas fa-file-signature"></i>
                     @if($wfhLetterPendingCount > 0)
                         <span class="bottom-nav-badge">{{ $wfhLetterPendingCount }}</span>

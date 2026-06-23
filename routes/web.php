@@ -46,6 +46,8 @@ Route::post('/notifications/read-all', 'NotificationController@markAllAsRead')->
 
 Route::prefix('wfh-letter-approvals')->name('wfh-letter-approvals.')->middleware(['auth'])->group(function () {
     Route::get('/', 'WfhLetterApprovalController@index')->name('index');
+    Route::get('monitoring-laporan', 'WfhLetterApprovalController@monitoring')->name('monitoring');
+    Route::get('monitoring-laporan/{laporan}', 'WfhLetterApprovalController@report')->name('report');
     Route::get('{wfhDate}', 'WfhLetterApprovalController@show')->name('show');
     Route::get('{wfhDate}/pdf', 'WfhLetterApprovalController@pdf')->name('pdf');
     Route::post('{wfhDate}/sign', 'WfhLetterApprovalController@sign')->name('sign');

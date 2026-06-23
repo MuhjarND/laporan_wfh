@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\AppSetting;
+use App\LaporanWfh;
 use App\Services\WhatsAppNotificationService;
 use App\User;
 use App\WfhDate;
@@ -43,6 +44,40 @@ class WfhLetterApprovalController extends Controller
         $approver = $this->approverFor($wfhDate);
 
         return view('wfh-letter-approvals.show', compact('wfhDate', 'users', 'registrations', 'approver'));
+    }
+
+    public function monitoring(Request $request)
+    {
+        $this->authorizeApprover();
+
+        $query = WfhDate::with(['users' => function ($q) {
+                $q->orderBy('name');
+            }])
+            ->where('is_active', true);
+
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->tanggal);
+        }
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal', $request->bulan);
+        }
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal', $request->tahun);
+        }
+
+        $wfhDates = $query->orderBy('tanggal', 'desc')->paginate(8);
+        $monitoringStats = $this->monitoringStats($wfhDates->getCollection());
+
+        return view('wfh-letter-approvals.monitoring', compact('wfhDates', 'monitoringStats'));
+    }
+
+    public function report(LaporanWfh $laporan)
+    {
+        $this->authorizeApprover();
+
+        $laporan->load('kegiatan.evidens', 'user', 'approver');
+
+        return view('wfh-letter-approvals.report', compact('laporan'));
     }
 
     public function pdf(WfhDate $wfhDate)
@@ -135,6 +170,53 @@ class WfhLetterApprovalController extends Controller
         return $wfhDate->users()->get()->sortBy(function ($user) {
             return sprintf('%03d-%s', $this->jabatanPriority($user), strtolower($user->name));
         })->values();
+    }
+
+    private function monitoringStats($wfhDates)
+    {
+        $stats = [];
+
+        foreach ($wfhDates as $wfhDate) {
+            $assignedUsers = $wfhDate->users;
+            $userIds = $assignedUsers->pluck('id')->all();
+
+            $laporans = LaporanWfh::withCount(['kegiatan' => function ($query) use ($wfhDate) {
+                    $query->whereDate('tanggal', $wfhDate->tanggal->toDateString());
+                }])
+                ->whereIn('user_id', $userIds)
+                ->where('bulan', $wfhDate->tanggal->month)
+                ->where('tahun', $wfhDate->tanggal->year)
+                ->get()
+                ->keyBy('user_id');
+
+            $rows = $assignedUsers->map(function ($user) use ($laporans) {
+                $laporan = $laporans->get($user->id);
+                $kegiatanCount = $laporan ? (int) $laporan->kegiatan_count : 0;
+
+                return [
+                    'user' => $user,
+                    'laporan' => $laporan,
+                    'kegiatan_count' => $kegiatanCount,
+                    'has_activity' => $kegiatanCount > 0,
+                    'report_status' => $laporan ? $laporan->status : 'belum_ada',
+                ];
+            })->values();
+
+            $stats[$wfhDate->id] = [
+                'rows' => $rows,
+                'assigned_count' => $rows->count(),
+                'activity_count' => $rows->where('has_activity', true)->count(),
+                'missing_activity_count' => $rows->where('has_activity', false)->count(),
+                'submitted_count' => $rows->filter(function ($row) {
+                    return in_array($row['report_status'], ['submitted', 'approved'], true);
+                })->count(),
+                'draft_count' => $rows->filter(function ($row) {
+                    return in_array($row['report_status'], ['draft', 'rejected'], true);
+                })->count(),
+            ];
+        }
+
+        return $stats;
     }
 
     private function jabatanPriority(User $user)

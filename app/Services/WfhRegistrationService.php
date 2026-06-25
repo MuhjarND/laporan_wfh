@@ -151,20 +151,35 @@ class WfhRegistrationService
         }
 
         foreach ($previousDates as $date) {
-            $hasActivity = LaporanWfh::where('user_id', $user->id)
-                ->where('bulan', $date->tanggal->month)
-                ->where('tahun', $date->tanggal->year)
-                ->whereHas('kegiatan', function ($query) use ($date) {
-                    $query->whereDate('tanggal', $date->tanggal->toDateString());
-                })
-                ->exists();
-
-            if (!$hasActivity) {
+            if (!$this->hasActivityForWfhDate($user, $date)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    private function hasActivityForWfhDate(User $user, WfhDate $wfhDate): bool
+    {
+        $exactDate = $wfhDate->tanggal->toDateString();
+        $weekStart = $wfhDate->tanggal->copy()->startOfWeek(Carbon::MONDAY)->toDateString();
+        $weekEnd = $wfhDate->tanggal->copy()->endOfWeek(Carbon::SUNDAY)->toDateString();
+
+        $hasExactActivity = LaporanWfh::where('user_id', $user->id)
+            ->whereHas('kegiatan', function ($query) use ($exactDate) {
+                $query->whereDate('tanggal', $exactDate);
+            })
+            ->exists();
+
+        if ($hasExactActivity) {
+            return true;
+        }
+
+        return LaporanWfh::where('user_id', $user->id)
+            ->whereHas('kegiatan', function ($query) use ($weekStart, $weekEnd) {
+                $query->whereBetween('tanggal', [$weekStart, $weekEnd]);
+            })
+            ->exists();
     }
 
     private function hadWfhOnPreviousFriday(User $user, WfhDate $wfhDate): bool

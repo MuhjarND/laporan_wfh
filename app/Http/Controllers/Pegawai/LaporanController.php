@@ -51,10 +51,14 @@ class LaporanController extends Controller
         $request->validate([
             'bulan' => 'required|integer|between:1,12',
             'tahun' => 'required|integer|min:2020|max:2030',
-            'signature_pegawai' => 'required|string|starts_with:data:image/png;base64,',
         ]);
 
         $user = auth()->user();
+
+        if (!$user->signature) {
+            return redirect()->route('signature.edit')
+                ->with('error', 'Silakan isi tanda tangan terlebih dahulu sebelum membuat laporan.');
+        }
 
         // Check if already exists
         $exists = LaporanWfh::where('user_id', $user->id)
@@ -72,7 +76,7 @@ class LaporanController extends Controller
             'bulan' => $request->bulan,
             'tahun' => $request->tahun,
             'status' => 'draft',
-            'signature_pegawai' => $request->signature_pegawai,
+            'signature_pegawai' => $user->signature,
         ]);
 
         return redirect()->route('pegawai.laporan.edit', $laporan)
@@ -133,7 +137,7 @@ class LaporanController extends Controller
             'kegiatan' => 'required|string',
             'capaian' => 'required|string',
             'tempat_wfh' => 'required|string|max:255',
-            'eviden' => 'nullable|array|max:10',
+            'eviden' => 'required|array|min:1|max:10',
             'eviden.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
         $this->validateEvidenFileExtensions($request);
@@ -141,7 +145,7 @@ class LaporanController extends Controller
         if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Tanggal WFH tidak tersedia atau belum diaktifkan oleh admin.');
+                ->with('error', 'Tanggal WFH tidak tersedia untuk akun Anda. Pastikan Anda terpilih WFH pada tanggal tersebut.');
         }
 
         $kegiatan = KegiatanWfh::create([
@@ -152,7 +156,7 @@ class LaporanController extends Controller
             'tempat_wfh' => $request->tempat_wfh,
         ]);
 
-        $this->storeEvidenFiles($request, $kegiatan);
+        $this->replaceEvidenFiles($request, $kegiatan);
 
         // Reset status if was submitted/rejected
         if (in_array($laporan->status, ['submitted', 'rejected'])) {
@@ -181,11 +185,12 @@ class LaporanController extends Controller
             'eviden.*' => 'file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt',
         ]);
         $this->validateEvidenFileExtensions($request);
+        $this->ensureKegiatanHasEviden($request, $kegiatan);
 
         if (!$this->isEligibleWfhDate(auth()->user(), $request->tanggal)) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Tanggal WFH tidak tersedia atau belum diaktifkan oleh admin.');
+                ->with('error', 'Tanggal WFH tidak tersedia untuk akun Anda. Pastikan Anda terpilih WFH pada tanggal tersebut.');
         }
 
         $data = [
@@ -196,7 +201,9 @@ class LaporanController extends Controller
         ];
 
         $kegiatan->update($data);
-        $this->storeEvidenFiles($request, $kegiatan);
+        if ($request->hasFile('eviden')) {
+            $this->replaceEvidenFiles($request, $kegiatan);
+        }
 
         return redirect()->route('pegawai.laporan.edit', $laporan)
             ->with('success', 'Kegiatan berhasil diperbarui.');
@@ -231,13 +238,23 @@ class LaporanController extends Controller
                 ->with('error', 'Tidak dapat mengajukan laporan tanpa kegiatan.');
         }
 
+        $user = auth()->user();
+        if (!$laporan->signature_pegawai) {
+            if (!$user->signature) {
+                return redirect()->route('signature.edit')
+                    ->with('error', 'Silakan isi tanda tangan terlebih dahulu sebelum mengajukan laporan.');
+            }
+
+            $laporan->signature_pegawai = $user->signature;
+        }
+
         $laporan->update([
             'status' => 'submitted',
             'submitted_at' => now(),
+            'signature_pegawai' => $laporan->signature_pegawai,
         ]);
 
         // Send notification to atasan
-        $user = auth()->user();
         if ($user->atasan) {
             $user->atasan->notify(new \App\Notifications\LaporanSubmitted($laporan));
             app(WhatsAppNotificationService::class)->sendSubmittedToAtasan($laporan);
@@ -345,6 +362,41 @@ class LaporanController extends Controller
         }
     }
 
+    private function replaceEvidenFiles(Request $request, KegiatanWfh $kegiatan)
+    {
+        foreach ($kegiatan->evidens as $eviden) {
+            $eviden->delete();
+        }
+
+        if ($kegiatan->eviden_path) {
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($kegiatan->eviden_path);
+            $kegiatan->update([
+                'eviden_token' => null,
+                'eviden_path' => null,
+                'eviden_original_name' => null,
+                'eviden_mime' => null,
+                'eviden_size' => null,
+            ]);
+        }
+
+        $this->storeEvidenFiles($request, $kegiatan);
+    }
+
+    private function ensureKegiatanHasEviden(Request $request, KegiatanWfh $kegiatan)
+    {
+        if ($request->hasFile('eviden')) {
+            return;
+        }
+
+        if ($kegiatan->evidens()->exists() || $kegiatan->eviden_path) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'eviden' => 'Eviden wajib diunggah.',
+        ]);
+    }
+
     private function validateEvidenFileExtensions(Request $request)
     {
         if (!$request->hasFile('eviden')) {
@@ -390,6 +442,9 @@ class LaporanController extends Controller
         return WfhDate::whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->where('is_active', true)
+            ->whereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })
             ->orderBy('tanggal')
             ->get();
     }
@@ -400,6 +455,9 @@ class LaporanController extends Controller
 
         return WfhDate::whereDate('tanggal', $date->toDateString())
             ->where('is_active', true)
+            ->whereHas('users', function ($query) use ($user) {
+                $query->where('users.id', $user->id);
+            })
             ->exists();
     }
 }

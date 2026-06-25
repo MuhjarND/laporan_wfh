@@ -21,20 +21,6 @@
         border-radius: 6px;
         background: #fff;
     }
-    .signature-box {
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        background: #fff;
-        padding: 8px;
-    }
-    .signature-canvas {
-        width: 100%;
-        height: 180px;
-        border: 1px dashed #94a3b8;
-        border-radius: 4px;
-        touch-action: none;
-        display: block;
-    }
     @media (max-width: 992px) {
         .approval-grid {
             grid-template-columns: 1fr;
@@ -110,9 +96,19 @@
                         <i class="fas fa-check mr-1"></i> Sudah Ditandatangani
                     </button>
                 @else
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#signatureModal">
-                        <i class="fas fa-signature mr-1"></i> Tanda Tangani
-                    </button>
+                    @unless(auth()->user()->signature)
+                        <div class="alert alert-warning text-left">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Anda belum menyimpan tanda tangan. Silakan isi melalui menu
+                            <a href="{{ route('signature.edit') }}" class="alert-link">Tanda Tangan Saya</a>.
+                        </div>
+                    @endunless
+                    <form action="{{ route('wfh-letter-approvals.sign', $wfhDate) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-signature mr-1"></i> Tanda Tangani & Kirim Notifikasi
+                        </button>
+                    </form>
                 @endif
             </div>
         </div>
@@ -160,119 +156,4 @@
         </div>
     </div>
 </div>
-
-<div class="modal fade" id="signatureModal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <form action="{{ route('wfh-letter-approvals.sign', $wfhDate) }}" method="POST" class="modal-content" id="signatureForm">
-            @csrf
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-signature mr-1"></i> Tanda Tangan Surat</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted">Bubuhkan tanda tangan pada area berikut.</p>
-                <div class="signature-box">
-                    <canvas class="signature-canvas" id="signatureCanvas"></canvas>
-                    <input type="hidden" name="letter_signature" id="signatureInput" required>
-                </div>
-                @error('letter_signature')<small class="text-danger">{{ $message }}</small>@enderror
-                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="clearSignature">
-                    <i class="fas fa-eraser mr-1"></i> Hapus
-                </button>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-check mr-1"></i> Tanda Tangani & Kirim Notifikasi
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-@endsection
-
-@section('scripts')
-<script>
-(function () {
-    var canvas = document.getElementById('signatureCanvas');
-    var input = document.getElementById('signatureInput');
-    var clearButton = document.getElementById('clearSignature');
-    var form = document.getElementById('signatureForm');
-    if (!canvas || !input || !form) return;
-
-    var ctx = canvas.getContext('2d');
-    var drawing = false;
-    var hasDrawing = false;
-
-    function resizeCanvas() {
-        var ratio = Math.max(window.devicePixelRatio || 1, 1);
-        var rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * ratio;
-        canvas.height = rect.height * ratio;
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#1e3a8a';
-    }
-
-    function point(event) {
-        var rect = canvas.getBoundingClientRect();
-        var source = event.touches && event.touches.length ? event.touches[0] : event;
-        return {
-            x: source.clientX - rect.left,
-            y: source.clientY - rect.top
-        };
-    }
-
-    function start(event) {
-        event.preventDefault();
-        drawing = true;
-        hasDrawing = true;
-        var p = point(event);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-    }
-
-    function move(event) {
-        if (!drawing) return;
-        event.preventDefault();
-        var p = point(event);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-    }
-
-    function stop() {
-        drawing = false;
-        input.value = canvas.toDataURL('image/png');
-    }
-
-    $('#signatureModal').on('shown.bs.modal', function () {
-        resizeCanvas();
-    });
-
-    window.addEventListener('resize', resizeCanvas);
-    canvas.addEventListener('mousedown', start);
-    canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup', stop);
-    canvas.addEventListener('mouseleave', stop);
-    canvas.addEventListener('touchstart', start, { passive: false });
-    canvas.addEventListener('touchmove', move, { passive: false });
-    canvas.addEventListener('touchend', stop);
-
-    clearButton.addEventListener('click', function () {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        input.value = '';
-        hasDrawing = false;
-    });
-
-    form.addEventListener('submit', function (event) {
-        if (!hasDrawing || !input.value) {
-            event.preventDefault();
-            alert('Tanda tangan wajib diisi.');
-        }
-    });
-})();
-</script>
 @endsection

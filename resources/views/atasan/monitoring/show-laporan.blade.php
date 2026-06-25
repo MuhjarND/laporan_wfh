@@ -9,21 +9,6 @@
 
 @section('styles')
 <style>
-    .signature-box {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        background: #fff;
-        padding: 10px;
-    }
-    .signature-canvas {
-        width: 100%;
-        height: 150px;
-        display: block;
-        border: 1px dashed #9ca3af;
-        border-radius: 6px;
-        background: #fff;
-        touch-action: none;
-    }
     .review-card-tools {
         display: flex;
         justify-content: flex-end;
@@ -154,15 +139,14 @@
                             <label>Catatan (opsional)</label>
                             <textarea name="catatan_atasan" class="form-control" rows="2" placeholder="Catatan untuk pegawai..."></textarea>
                         </div>
-                        <div class="form-group">
-                            <label>Tanda Tangan Atasan *</label>
-                            <div class="signature-box">
-                                <canvas class="signature-canvas" id="signatureCanvas"></canvas>
-                                <input type="hidden" name="signature_atasan" id="signatureInput" required>
-                                <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="clearSignature">
-                                    <i class="fas fa-eraser mr-1"></i> Hapus
-                                </button>
-                            </div>
+                        <div class="alert {{ auth()->user()->signature ? 'alert-info' : 'alert-warning' }}">
+                            <i class="fas fa-signature mr-1"></i>
+                            @if(auth()->user()->signature)
+                                Persetujuan akan memakai tanda tangan yang tersimpan di menu Tanda Tangan Saya.
+                            @else
+                                Anda belum menyimpan tanda tangan. Silakan isi melalui menu
+                                <a href="{{ route('signature.edit') }}" class="alert-link">Tanda Tangan Saya</a>.
+                            @endif
                         </div>
                         <button type="submit" class="btn btn-success btn-block">
                             <i class="fas fa-check mr-1"></i> Setujui
@@ -221,71 +205,6 @@
 @section('scripts')
 <script>
 (function () {
-    var canvas = document.getElementById('signatureCanvas');
-    if (!canvas) return;
-    var input = document.getElementById('signatureInput');
-    var clearBtn = document.getElementById('clearSignature');
-    var ctx = canvas.getContext('2d');
-    var drawing = false;
-    var hasDrawn = false;
-
-    function resizeCanvas() {
-        var ratio = Math.max(window.devicePixelRatio || 1, 1);
-        var rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * ratio;
-        canvas.height = rect.height * ratio;
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#111827';
-    }
-
-    function point(event) {
-        var rect = canvas.getBoundingClientRect();
-        var touch = event.touches ? event.touches[0] : event;
-        return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-    }
-
-    function start(event) {
-        event.preventDefault();
-        drawing = true;
-        var p = point(event);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-    }
-
-    function move(event) {
-        if (!drawing) return;
-        event.preventDefault();
-        var p = point(event);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-        hasDrawn = true;
-        input.value = canvas.toDataURL('image/png');
-    }
-
-    function stop() {
-        drawing = false;
-        if (hasDrawn) input.value = canvas.toDataURL('image/png');
-    }
-
-    $('#actionModal').on('shown.bs.modal', function () {
-        resizeCanvas();
-    });
-    window.addEventListener('resize', resizeCanvas);
-    canvas.addEventListener('mousedown', start);
-    canvas.addEventListener('mousemove', move);
-    canvas.addEventListener('mouseup', stop);
-    canvas.addEventListener('mouseleave', stop);
-    canvas.addEventListener('touchstart', start, { passive: false });
-    canvas.addEventListener('touchmove', move, { passive: false });
-    canvas.addEventListener('touchend', stop);
-    clearBtn.addEventListener('click', function () {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        input.value = '';
-        hasDrawn = false;
-    });
-
     @if(request('tindaklanjuti') === '1' && $laporan->status === 'submitted')
     $('#actionModal').modal('show');
     @endif

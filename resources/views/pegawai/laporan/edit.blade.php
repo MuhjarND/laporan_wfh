@@ -199,9 +199,11 @@
                     <div class="form-group"><label>Kegiatan / Tugas *</label><textarea name="kegiatan" id="kegiatan" class="form-control js-ckeditor" rows="3" required placeholder="Uraian kegiatan...">{{ old('kegiatan') }}</textarea></div>
                     <div class="form-group"><label>Capaian / Hasil *</label><textarea name="capaian" id="capaian" class="form-control js-ckeditor" rows="3" required placeholder="Capaian/hasil...">{{ old('capaian') }}</textarea></div>
                     <div class="form-group">
-                        <label>Eviden (opsional)</label>
-                        <input type="file" name="eviden[]" class="form-control-file" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                        <label>Eviden *</label>
+                        <input type="file" name="eviden[]" class="form-control-file" multiple required accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
                         <small class="form-text text-muted">Bisa lebih dari 1 file. Maksimal 10 MB per file. File executable seperti PHP tidak diizinkan.</small>
+                        @error('eviden')<small class="text-danger d-block">{{ $message }}</small>@enderror
+                        @error('eviden.*')<small class="text-danger d-block">{{ $message }}</small>@enderror
                     </div>
                 </div>
                 <div class="card-footer text-right" style="background:#fafbfc;"><button type="submit" class="btn btn-primary"><i class="fas fa-plus mr-1"></i> Tambah</button></div>
@@ -299,9 +301,11 @@
                     <div class="form-group"><label>Kegiatan</label><textarea name="kegiatan" id="edit_kegiatan" class="form-control" rows="3" required></textarea></div>
                     <div class="form-group"><label>Capaian</label><textarea name="capaian" id="edit_capaian" class="form-control" rows="3" required></textarea></div>
                     <div class="form-group">
-                        <label>Eviden (opsional)</label>
+                        <label>Eviden</label>
                         <input type="file" name="eviden[]" id="edit_eviden" class="form-control-file" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
-                        <small class="form-text text-muted">File baru akan ditambahkan ke eviden yang sudah ada. Maksimal 10 MB per file.</small>
+                        <small class="form-text text-muted">Jika mengunggah file baru, seluruh eviden lama pada kegiatan ini akan diganti. Eviden wajib ada pada setiap kegiatan.</small>
+                        @error('eviden')<small class="text-danger d-block">{{ $message }}</small>@enderror
+                        @error('eviden.*')<small class="text-danger d-block">{{ $message }}</small>@enderror
                     </div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Simpan</button></div>

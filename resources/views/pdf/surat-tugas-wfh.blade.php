@@ -211,16 +211,16 @@
         }
 
         .signature .space {
-            height: 70px;
+            height: 56px;
             position: relative;
         }
 
         .signature-img {
             position: absolute;
-            top: -22px;
-            left: -82px;
-            width: 360px;
-            max-height: 132px;
+            top: -58px;
+            left: -96px;
+            width: 395px;
+            max-height: 168px;
             z-index: 3;
             opacity: .98;
         }

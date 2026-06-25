@@ -168,6 +168,12 @@ class WhatsAppNotificationService
             return false;
         }
 
+        $activityUrl = URL::temporarySignedRoute(
+            'wfh-letter-link.open',
+            now()->addDays(7),
+            ['wfhDate' => $wfhDate->id, 'user' => $user->id, 'type' => 'activity']
+        );
+
         $message = implode("\n", [
             '*[NOTIF LAPWFH]*',
             '',
@@ -181,7 +187,7 @@ class WhatsAppNotificationService
             'Keterangan: ' . ($wfhDate->keterangan ?: '-'),
             '',
             'Mohon segera mengisi laporan kegiatan melalui tautan berikut:',
-            route('pegawai.laporan.index'),
+            $activityUrl,
             '',
             'Apabila laporan sudah dibuat, mohon abaikan pesan ini.',
             '',
@@ -200,6 +206,12 @@ class WhatsAppNotificationService
             return false;
         }
 
+        $submitUrl = URL::temporarySignedRoute(
+            'wfh-letter-link.open',
+            now()->addDays(7),
+            ['wfhDate' => $wfhDate->id, 'user' => $user->id, 'type' => 'submit']
+        );
+
         $message = implode("\n", [
             '*[NOTIF LAPWFH]*',
             '',
@@ -213,7 +225,7 @@ class WhatsAppNotificationService
             'Periode: ' . $wfhDate->tanggal->format('m/Y'),
             '',
             'Mohon segera membuka laporan WFH dan menekan tombol Ajukan ke Atasan melalui tautan berikut:',
-            route('pegawai.laporan.index'),
+            $submitUrl,
             '',
             'Apabila laporan sudah diajukan, mohon abaikan pesan ini.',
             '',

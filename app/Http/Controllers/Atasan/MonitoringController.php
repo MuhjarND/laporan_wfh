@@ -52,13 +52,18 @@ class MonitoringController extends Controller
             return redirect()->back()->with('error', 'Hanya laporan yang sudah diajukan yang dapat disetujui.');
         }
         $request->validate([
-            'signature_atasan' => 'required|string|starts_with:data:image/png;base64,',
             'catatan_atasan' => 'nullable|string',
         ]);
+
+        if (!$user->signature) {
+            return redirect()->route('signature.edit')
+                ->with('error', 'Silakan isi tanda tangan terlebih dahulu sebelum menyetujui laporan.');
+        }
+
         $laporan->update([
             'status' => 'approved',
             'catatan_atasan' => $request->catatan_atasan,
-            'signature_atasan' => $request->signature_atasan,
+            'signature_atasan' => $user->signature,
             'approved_at' => now(),
             'approved_by' => $user->id,
         ]);
@@ -133,11 +138,15 @@ class MonitoringController extends Controller
     public function signAll(Request $request)
     {
         $request->validate([
-            'signature_atasan' => 'required|string|starts_with:data:image/png;base64,',
             'catatan_atasan' => 'nullable|string',
         ]);
 
         $user = auth()->user();
+        if (!$user->signature) {
+            return redirect()->route('signature.edit')
+                ->with('error', 'Silakan isi tanda tangan terlebih dahulu sebelum menyetujui laporan.');
+        }
+
         $bawahanIds = User::where('atasan_id', $user->id)->pluck('id');
         $laporans = LaporanWfh::whereIn('user_id', $bawahanIds)
             ->where('status', 'submitted')
@@ -147,7 +156,7 @@ class MonitoringController extends Controller
             $laporan->update([
                 'status' => 'approved',
                 'catatan_atasan' => $request->catatan_atasan,
-                'signature_atasan' => $request->signature_atasan,
+                'signature_atasan' => $user->signature,
                 'approved_at' => now(),
                 'approved_by' => $user->id,
             ]);

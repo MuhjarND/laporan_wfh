@@ -100,10 +100,12 @@ class WfhLetterApprovalController extends Controller
     public function sign(Request $request, WfhDate $wfhDate, WhatsAppNotificationService $whatsApp)
     {
         $this->authorizeApprover();
+        $user = auth()->user();
 
-        $request->validate([
-            'letter_signature' => 'required|string|starts_with:data:image/png;base64,',
-        ]);
+        if (!$user->signature) {
+            return redirect()->route('signature.edit')
+                ->with('error', 'Silakan isi tanda tangan terlebih dahulu sebelum menandatangani surat tugas.');
+        }
 
         if (!$wfhDate->letter_number) {
             return redirect()->back()->with('error', 'Nomor surat belum diisi.');
@@ -119,7 +121,7 @@ class WfhLetterApprovalController extends Controller
             'letter_approved_at' => now(),
             'letter_published_at' => now(),
             'letter_approved_by' => auth()->id(),
-            'letter_signature' => $request->letter_signature,
+            'letter_signature' => $user->signature,
         ]);
 
         $wfhDate = $wfhDate->fresh(['registrations.user']);

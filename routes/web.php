@@ -31,13 +31,16 @@ Route::get('/eviden/{token}/file', 'EvidenController@file')->name('eviden.file')
 
 // Signed WhatsApp links for WFH letter/status access. Valid signature logs the target user in.
 Route::get('/wfh-letter-link/{wfhDate}/{user}/{type}', 'WfhLetterLinkController@open')
-    ->where('type', 'letter|status')
+    ->where('type', 'letter|status|activity|submit')
     ->name('wfh-letter-link.open');
 
 // Dashboard
 Route::get('/dashboard', 'DashboardController@index')
     ->name('dashboard')
     ->middleware(['auth', 'sso.permission:wfh.dashboard.view']);
+
+Route::get('/signature', 'SignatureController@edit')->name('signature.edit')->middleware('auth');
+Route::post('/signature', 'SignatureController@update')->name('signature.update')->middleware('auth');
 
 // Notifications
 Route::get('/notifications', 'NotificationController@index')->name('notifications.index');

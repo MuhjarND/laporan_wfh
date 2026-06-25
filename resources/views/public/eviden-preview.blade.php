@@ -19,6 +19,23 @@
         }
         .frame-wrap { height: calc(100vh - 58px); padding: 12px; }
         iframe { width: 100%; height: 100%; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; }
+        .image-wrap {
+            min-height: calc(100vh - 82px);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-preview {
+            display: block;
+            max-width: min(100%, 1080px);
+            max-height: calc(100vh - 112px);
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+        }
         .fallback { padding: 18px; font-size: 13px; color: #6b7280; }
         @media (max-width: 600px) {
             .header { align-items: flex-start; flex-direction: column; }
@@ -28,26 +45,37 @@
     </style>
 </head>
 <body>
+    @php
+        $token = $eviden ? $eviden->token : $kegiatan->eviden_token;
+        $mime = $eviden ? $eviden->mime : $kegiatan->eviden_mime;
+        $name = $eviden ? $eviden->original_name : $kegiatan->eviden_original_name;
+        $extension = strtolower(pathinfo((string) $name, PATHINFO_EXTENSION));
+        $isImage = ($mime && strpos($mime, 'image/') === 0) || in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+    @endphp
     <div class="header">
         <div>
             <h1 class="title">Preview Eviden WFH</h1>
             <div class="meta">
                 {{ $kegiatan->laporan->user->name ?? '-' }} - {{ $kegiatan->tanggal->format('d/m/Y') }}
-                @if($eviden)
-                    - {{ $eviden->original_name }}
-                @elseif($kegiatan->eviden_original_name)
-                    - {{ $kegiatan->eviden_original_name }}
+                @if($name)
+                    - {{ $name }}
                 @endif
             </div>
         </div>
-        <a class="btn" href="{{ route('eviden.file', $eviden ? $eviden->token : $kegiatan->eviden_token) }}" target="_blank" rel="noopener">Buka File</a>
+        <a class="btn" href="{{ route('eviden.file', $token) }}" target="_blank" rel="noopener">Buka File</a>
     </div>
-    <div class="frame-wrap">
-        <iframe src="{{ route('eviden.file', $eviden ? $eviden->token : $kegiatan->eviden_token) }}" title="Preview Eviden">
-            <div class="fallback">
-                Browser tidak dapat menampilkan preview. Gunakan tombol Buka File.
-            </div>
-        </iframe>
-    </div>
+    @if($isImage)
+        <div class="image-wrap">
+            <img src="{{ route('eviden.file', $token) }}" class="image-preview" alt="Preview Eviden">
+        </div>
+    @else
+        <div class="frame-wrap">
+            <iframe src="{{ route('eviden.file', $token) }}" title="Preview Eviden">
+                <div class="fallback">
+                    Browser tidak dapat menampilkan preview. Gunakan tombol Buka File.
+                </div>
+            </iframe>
+        </div>
+    @endif
 </body>
 </html>

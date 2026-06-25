@@ -12,7 +12,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'app_user_id', 'sso_id', 'name', 'nip', 'email', 'phone', 'password', 'role',
-        'pangkat', 'jabatan', 'satuan_kerja', 'atasan_id', 'avatar', 'is_active',
+        'pangkat', 'jabatan', 'satuan_kerja', 'atasan_id', 'avatar', 'signature', 'is_active',
     ];
 
     protected $hidden = [

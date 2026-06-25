@@ -351,6 +351,10 @@
                         {{ auth()->user()->name }}<br><small class="text-muted">{{ ucfirst(str_replace('_',' ',auth()->user()->role)) }}</small>
                     </span>
                     <div class="dropdown-divider"></div>
+                    <a href="{{ route('signature.edit') }}" class="dropdown-item">
+                        <i class="fas fa-signature mr-2 text-primary"></i> Tanda Tangan Saya
+                    </a>
+                    <div class="dropdown-divider"></div>
                     <a href="{{ session('sso_access_token') ? route('logout.sso') : route('logout') }}" class="dropdown-item" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                         <i class="fas fa-sign-out-alt mr-2 text-danger"></i> Logout
                     </a>
@@ -380,6 +384,11 @@
                     <li class="nav-item">
                         <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tachometer-alt"></i><p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('signature.edit') }}" class="nav-link {{ request()->routeIs('signature.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-signature"></i><p>Tanda Tangan Saya</p>
                         </a>
                     </li>
                     @if(auth()->user()->isSuperAdmin())

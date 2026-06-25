@@ -42,11 +42,14 @@
         .ttd-right-inner { text-align: left; display: inline-block; }
         .ttd-section p { margin: 0; padding: 0; line-height: 1.22; }
         .ttd-name { font-weight: bold; text-decoration: underline; }
-        .ttd-spacer { height: 48px; }
-        .ttd-img { height: 50px; max-width: 170px; object-fit: contain; }
-        .ttd-stack { position: relative; height: 58px; width: 190px; overflow: visible; }
-        .ttd-stack .ttd-img { position: absolute; left: -38px; top: -18px; height: 108px; max-width: 270px; z-index: 2; }
-        .cap-img { position: absolute; left: -24px; top: -38px; height: 164px; max-width: 180px; z-index: 1; opacity: .78; }
+        .ttd-spacer { height: 54px; }
+        .ttd-img { height: 58px; max-width: 190px; object-fit: contain; }
+        .ttd-stack { position: relative; height: 50px; width: 210px; overflow: visible; }
+        .ttd-stack .ttd-img { position: absolute; left: -42px; top: -38px; height: 132px; max-width: 300px; z-index: 3; opacity: .98; }
+        .ttd-stack-pegawai { margin-top: 0; }
+        .ttd-stack-pegawai .ttd-img { left: -48px; top: -42px; height: 136px; max-width: 310px; }
+        .ttd-name { position: relative; z-index: 1; }
+        .cap-img { position: absolute; left: -28px; top: -48px; height: 176px; max-width: 190px; z-index: 2; opacity: .78; }
     </style>
 </head>
 <body>
@@ -55,6 +58,9 @@
 @endphp
 
 @foreach($laporans as $laporan)
+    @php
+        $signaturePegawai = $laporan->signature_pegawai ?: optional($laporan->user)->signature;
+    @endphp
     <div class="laporan-page">
         <div class="kop-surat">
             @if(isset($isPdf) && $isPdf)
@@ -136,8 +142,10 @@
                         <div class="ttd-right-inner">
                             <p>Manokwari, {{ date('d') }} {{ $bulanNames[(int)date('m')] }} {{ date('Y') }}</p>
                             <p><strong>Pegawai Yang WFH</strong></p>
-                            @if($laporan->signature_pegawai)
-                                <img src="{{ $laporan->signature_pegawai }}" class="ttd-img" alt="Tanda Tangan Pegawai">
+                            @if($signaturePegawai)
+                                <div class="ttd-stack ttd-stack-pegawai">
+                                    <img src="{{ $signaturePegawai }}" class="ttd-img" alt="Tanda Tangan Pegawai">
+                                </div>
                             @else
                                 <div class="ttd-spacer"></div>
                             @endif

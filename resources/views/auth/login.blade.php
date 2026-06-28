@@ -6,7 +6,7 @@
     <title>Login - SIAP WFH PTA Papua Barat</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo5.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -138,7 +138,7 @@
 <body>
     <div class="login-left">
         <div class="logo-area">
-            <div class="logo-icon"><img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi"></div>
+            <div class="logo-icon"><img src="{{ asset('logo5.png') }}" alt="Logo Aplikasi"></div>
             <h1>SIAP WFH</h1>
             <h2>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</h2>
             <div class="divider"></div>
@@ -148,7 +148,7 @@
     <div class="login-right">
         <div class="login-form">
             <div class="mobile-header">
-                <div class="m-icon"><img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi"></div>
+                <div class="m-icon"><img src="{{ asset('logo5.png') }}" alt="Logo Aplikasi"></div>
                 <h3>SIAP WFH</h3>
                 <p>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</p>
             </div>

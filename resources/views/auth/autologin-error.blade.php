@@ -6,7 +6,7 @@
     <title>Login Tidak Valid - SIAP WFH</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo5.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <style>
         * { box-sizing: border-box; }
@@ -52,7 +52,7 @@
 </head>
 <body>
     <div class="box">
-        <img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi" class="logo">
+        <img src="{{ asset('logo5.png') }}" alt="Logo Aplikasi" class="logo">
         <h1>Login Tidak Valid</h1>
         <p>{{ $message }}</p>
         <a href="{{ route('login') }}">Ke Halaman Login</a>

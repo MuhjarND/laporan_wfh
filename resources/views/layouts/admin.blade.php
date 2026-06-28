@@ -7,7 +7,7 @@
     <title>@yield('title', 'SIAP WFH') - PTA Papua Barat</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo5.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -435,7 +435,7 @@
     <!-- Sidebar -->
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <a href="{{ route('dashboard') }}" class="brand-link">
-            <img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
+            <img src="{{ asset('logo5.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
             <span class="brand-text">SIAP WFH</span>
             <small>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</small>
         </a>

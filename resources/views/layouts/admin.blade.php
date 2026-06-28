@@ -239,7 +239,7 @@
 
         /* ===== MOBILE ===== */
         @media(max-width:768px) {
-            body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+            body { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
             .main-sidebar { display: none !important; }
             .main-header { margin-left: 0 !important; }
             .main-header .navbar-nav:first-child { display: none; }
@@ -265,45 +265,64 @@
                 right: 0;
                 bottom: 0;
                 z-index: 1040;
-                display: grid;
-                grid-auto-flow: column;
-                grid-auto-columns: 1fr;
-                gap: 4px;
-                padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-height: calc(68px + env(safe-area-inset-bottom));
+                padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
                 background: #fff;
                 border-top: 1px solid var(--border);
                 box-shadow: 0 -8px 24px rgba(15, 23, 42, .12);
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .mobile-bottom-nav::-webkit-scrollbar {
+                display: none;
             }
             .mobile-bottom-nav a,
             .mobile-bottom-nav button {
                 position: relative;
-                min-width: 0;
-                min-height: 52px;
+                flex: 1 0 62px;
+                min-width: 62px;
+                max-width: 88px;
+                min-height: 54px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 4px;
+                gap: 5px;
                 color: #6b7280;
                 text-decoration: none;
                 border-radius: 8px;
                 border: 0;
                 background: transparent;
-                font-size: .68rem;
+                font-size: .64rem;
                 font-weight: 700;
                 line-height: 1.1;
                 font-family: inherit;
                 cursor: pointer;
+                padding: 6px 5px;
+                white-space: nowrap;
+            }
+            .mobile-bottom-nav a span:not(.bottom-nav-badge),
+            .mobile-bottom-nav button span:not(.bottom-nav-badge) {
+                display: block;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .mobile-bottom-nav a i,
             .mobile-bottom-nav button i {
-                font-size: 1.05rem;
+                font-size: 1.12rem;
                 line-height: 1;
+                flex: 0 0 auto;
             }
             .mobile-bottom-nav .bottom-nav-badge {
                 position: absolute;
-                top: 4px;
-                right: 18%;
+                top: 3px;
+                right: 8px;
                 min-width: 18px;
                 height: 18px;
                 padding: 0 5px;
@@ -314,6 +333,7 @@
                 font-size: .62rem;
                 line-height: 14px;
                 text-align: center;
+                box-shadow: 0 2px 6px rgba(220,38,38,.25);
             }
             .mobile-bottom-nav a.active {
                 background: #ecfdf5;
@@ -321,19 +341,22 @@
             }
             .mobile-bottom-nav button.bottom-nav-logout {
                 color: #dc2626;
+                flex: 0 0 62px;
             }
             .mobile-bottom-nav a.bottom-nav-action {
+                flex: 0 0 58px;
                 width: 58px;
                 min-width: 58px;
+                max-width: 58px;
                 height: 58px;
                 min-height: 58px;
-                justify-self: center;
-                margin-top: -24px;
+                margin-top: -18px;
                 border-radius: 999px;
                 background: var(--accent);
                 color: #0f4c3a;
                 border: 4px solid #fff;
                 box-shadow: 0 8px 20px rgba(15, 76, 58, .28);
+                padding: 0;
             }
             .mobile-bottom-nav a.bottom-nav-action i {
                 font-size: 1.35rem;

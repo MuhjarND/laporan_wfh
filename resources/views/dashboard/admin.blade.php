@@ -4,6 +4,8 @@
 @section('breadcrumb')<li class="breadcrumb-item active">Dashboard</li>@endsection
 
 @section('content')
+@include('dashboard.partials.signature-alert')
+
 <div class="row">
     <div class="col-lg-3 col-6">
         <div class="small-box bg-gradient-success">

@@ -7,6 +7,7 @@ use App\User;
 use App\LaporanWfh;
 use App\KegiatanWfh;
 use App\WfhDate;
+use App\WfhRegistration;
 
 class DashboardController extends Controller
 {
@@ -89,12 +90,14 @@ class DashboardController extends Controller
             ->orderBy('updated_at', 'desc')
             ->take(5)
             ->get();
+        $dashboardWfhInfo = $this->dashboardWfhInfo($user);
 
         return view('dashboard.atasan', compact(
             'totalBawahan', 'laporanSubmitted', 'laporanApproved',
             'totalLaporan', 'recentKegiatan', 'bawahan',
             'laporanSayaTotal', 'laporanSayaDraft', 'laporanSayaSubmitted',
-            'laporanSayaApproved', 'currentLaporan', 'recentKegiatanSaya'
+            'laporanSayaApproved', 'currentLaporan', 'recentKegiatanSaya',
+            'dashboardWfhInfo'
         ));
     }
 
@@ -121,10 +124,44 @@ class DashboardController extends Controller
             ->where('bulan', $currentMonth)
             ->where('tahun', $currentYear)
             ->first();
+        $dashboardWfhInfo = $this->dashboardWfhInfo($user);
 
         return view('dashboard.pegawai', compact(
             'totalLaporan', 'laporanDraft', 'laporanSubmitted',
-            'laporanApproved', 'recentKegiatan', 'currentLaporan'
+            'laporanApproved', 'recentKegiatan', 'currentLaporan',
+            'dashboardWfhInfo'
         ));
+    }
+
+    private function dashboardWfhInfo(User $user)
+    {
+        $today = now()->toDateString();
+
+        $registrations = WfhRegistration::with('wfhDate')
+            ->where('user_id', $user->id)
+            ->whereHas('wfhDate', function ($query) use ($today) {
+                $query->where('is_active', true)
+                    ->whereDate('tanggal', '>=', $today);
+            })
+            ->get()
+            ->sortBy(function ($registration) {
+                $date = optional($registration->wfhDate)->tanggal;
+
+                return optional($date)->timestamp ?: PHP_INT_MAX;
+            })
+            ->values();
+
+        $openCount = WfhDate::where('is_active', true)
+            ->whereDate('tanggal', '>=', $today)
+            ->whereDoesntHave('registrations', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->count();
+
+        return [
+            'next_registration' => $registrations->first(),
+            'upcoming_count' => $registrations->count(),
+            'open_count' => $openCount,
+        ];
     }
 }

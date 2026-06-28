@@ -4,6 +4,8 @@
 @section('breadcrumb')<li class="breadcrumb-item active">Dashboard</li>@endsection
 
 @section('content')
+@include('dashboard.partials.signature-alert')
+
 <div class="row">
     <div class="col-lg-3 col-6">
         <div class="small-box bg-gradient-success">
@@ -67,28 +69,7 @@
         </div>
     </div>
     <div class="col-lg-7">
-        <div class="card">
-            <div class="card-header"><h3 class="card-title"><i class="fas fa-user-clock mr-2" style="color:var(--primary);"></i>Kegiatan Saya Terbaru</h3></div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Periode</th><th>Aksi</th></tr></thead>
-                    <tbody>
-                        @forelse($recentKegiatanSaya as $keg)
-                        <tr>
-                            <td>{{ $keg->tanggal->format('d/m/Y') }}</td>
-                            <td>{{ Str::limit(strip_tags($keg->kegiatan), 70) }}</td>
-                            <td><a href="{{ route('pegawai.laporan.show', $keg->laporan) }}" style="color:var(--primary);">{{ $keg->laporan->periode }}</a></td>
-                            <td><a href="{{ route('pegawai.laporan.show', $keg->laporan) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></a></td>
-                        </tr>
-                        @empty
-                        <tr><td colspan="4" class="text-center text-muted">Belum ada kegiatan pribadi</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-                </div>
-            </div>
-        </div>
+        @include('dashboard.partials.wfh-registration-info')
     </div>
 </div>
 <div class="row">
@@ -114,6 +95,32 @@
         </div>
     </div>
     <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title"><i class="fas fa-user-clock mr-2" style="color:var(--primary);"></i>Kegiatan Saya Terbaru</h3></div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Periode</th><th>Aksi</th></tr></thead>
+                    <tbody>
+                        @forelse($recentKegiatanSaya as $keg)
+                        <tr>
+                            <td>{{ $keg->tanggal->format('d/m/Y') }}</td>
+                            <td>{{ Str::limit(strip_tags($keg->kegiatan), 70) }}</td>
+                            <td><a href="{{ route('pegawai.laporan.show', $keg->laporan) }}" style="color:var(--primary);">{{ $keg->laporan->periode }}</a></td>
+                            <td><a href="{{ route('pegawai.laporan.show', $keg->laporan) }}" class="btn btn-sm btn-outline-secondary"><i class="fas fa-eye"></i></a></td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="4" class="text-center text-muted">Belum ada kegiatan pribadi</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
         <div class="card">
             <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Kegiatan Pegawai yang Dinilai Terbaru</h3></div>
             <div class="card-body p-0">

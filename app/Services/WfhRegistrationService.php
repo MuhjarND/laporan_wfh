@@ -34,7 +34,7 @@ class WfhRegistrationService
     {
         return Carbon::parse($wfhDate->tanggal->format('Y-m-d'), 'Asia/Jayapura')
             ->subDay()
-            ->setTime(14, 30);
+            ->setTime(16, 30);
     }
 
     public function isRegistrationOpen(WfhDate $wfhDate): bool
@@ -57,6 +57,10 @@ class WfhRegistrationService
             return [false, 'Tanggal WFH ini tidak aktif.'];
         }
 
+        if (in_array($wfhDate->letter_status, ['pending_approval', 'approved'], true)) {
+            return [false, 'Pendaftaran WFH tanggal ini sudah masuk proses surat tugas dan tidak dapat diubah.'];
+        }
+
         if ($wfhDate->tanggal->isPast() && !$wfhDate->tanggal->isToday()) {
             return [false, 'Tidak dapat mendaftar untuk tanggal WFH yang sudah lewat.'];
         }
@@ -69,12 +73,9 @@ class WfhRegistrationService
             return [false, 'Anda sudah terdaftar pada tanggal WFH ini.'];
         }
 
-        if ($this->remainingQuota($wfhDate) < 1) {
-            return [false, 'Kuota WFH untuk tanggal ini sudah penuh.'];
-        }
-
-        if (!$this->hasCompletedPreviousWeekActivities($user, $wfhDate)) {
-            return [false, 'Anda belum mengisi kegiatan WFH pada minggu sebelumnya. Silakan lengkapi kegiatan terlebih dahulu.'];
+        $incompleteDate = $this->incompletePriorAssignedWfhDate($user, $wfhDate);
+        if ($incompleteDate) {
+            return [false, 'Anda masih memiliki laporan kegiatan WFH yang belum selesai pada tanggal ' . $incompleteDate->tanggal->format('d/m/Y') . '. Silakan lengkapi kegiatan terlebih dahulu.'];
         }
 
         return [true, null];
@@ -96,8 +97,66 @@ class WfhRegistrationService
         });
     }
 
+    public function canCancel(User $user, WfhDate $wfhDate): array
+    {
+        if (!$wfhDate->registrations()->where('user_id', $user->id)->exists()) {
+            return [false, 'Anda belum terdaftar pada tanggal WFH ini.'];
+        }
+
+        if (in_array($wfhDate->letter_status, ['pending_approval', 'approved'], true)) {
+            return [false, 'Pendaftaran WFH tidak dapat dibatalkan karena sudah masuk proses surat tugas.'];
+        }
+
+        if (!$this->isRegistrationOpen($wfhDate)) {
+            return [false, $this->registrationClosedMessage($wfhDate) . ' Pembatalan pendaftaran sudah tidak dapat dilakukan.'];
+        }
+
+        return [true, null];
+    }
+
+    public function cancel(User $user, WfhDate $wfhDate)
+    {
+        return DB::transaction(function () use ($user, $wfhDate) {
+            $this->ensureRegistrationsFromAssignedUsers($wfhDate);
+
+            $beforeSelectedIds = WfhRegistration::where('wfh_date_id', $wfhDate->id)
+                ->where('status', 'selected')
+                ->pluck('user_id')
+                ->all();
+
+            WfhRegistration::where('wfh_date_id', $wfhDate->id)
+                ->where('user_id', $user->id)
+                ->delete();
+
+            DB::table('wfh_date_user')
+                ->where('wfh_date_id', $wfhDate->id)
+                ->where('user_id', $user->id)
+                ->delete();
+
+            $this->recalculateSelection($wfhDate->fresh());
+
+            $afterSelectedIds = WfhRegistration::where('wfh_date_id', $wfhDate->id)
+                ->where('status', 'selected')
+                ->pluck('user_id')
+                ->all();
+
+            $replacementIds = array_values(array_diff($afterSelectedIds, $beforeSelectedIds));
+
+            if (empty($replacementIds)) {
+                return collect();
+            }
+
+            return WfhRegistration::with('user')
+                ->where('wfh_date_id', $wfhDate->id)
+                ->whereIn('user_id', $replacementIds)
+                ->get();
+        });
+    }
+
     public function recalculateSelection(WfhDate $wfhDate): void
     {
+        $this->ensureRegistrationsFromAssignedUsers($wfhDate);
+
         $quota = $this->quota();
         $registrations = WfhRegistration::with('user')
             ->where('wfh_date_id', $wfhDate->id)
@@ -137,26 +196,35 @@ class WfhRegistrationService
 
     public function hasCompletedPreviousWeekActivities(User $user, WfhDate $wfhDate): bool
     {
-        $start = $wfhDate->tanggal->copy()->subWeek()->startOfWeek(Carbon::MONDAY);
-        $end = $wfhDate->tanggal->copy()->subWeek()->endOfWeek(Carbon::SUNDAY);
+        return $this->incompletePriorAssignedWfhDate($user, $wfhDate) === null;
+    }
 
-        $previousDates = WfhDate::whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
-            ->whereHas('users', function ($query) use ($user) {
-                $query->where('users.id', $user->id);
+    public function incompletePriorAssignedWfhDate(User $user, WfhDate $wfhDate)
+    {
+        $previousDates = WfhDate::where('is_active', true)
+            ->whereDate('tanggal', '<', $wfhDate->tanggal->toDateString())
+            ->where(function ($query) use ($user) {
+                $query->whereHas('users', function ($subQuery) use ($user) {
+                    $subQuery->where('users.id', $user->id);
+                })->orWhereHas('registrations', function ($subQuery) use ($user) {
+                    $subQuery->where('user_id', $user->id)
+                        ->where('status', 'selected');
+                });
             })
+            ->orderBy('tanggal')
             ->get();
 
         if ($previousDates->isEmpty()) {
-            return true;
+            return null;
         }
 
         foreach ($previousDates as $date) {
             if (!$this->hasActivityForWfhDate($user, $date)) {
-                return false;
+                return $date;
             }
         }
 
-        return true;
+        return null;
     }
 
     private function hasActivityForWfhDate(User $user, WfhDate $wfhDate): bool
@@ -187,17 +255,47 @@ class WfhRegistrationService
         $previousFriday = $wfhDate->tanggal->copy()->previous(Carbon::FRIDAY);
 
         return WfhDate::whereDate('tanggal', $previousFriday->toDateString())
-            ->whereHas('users', function ($query) use ($user) {
-                $query->where('users.id', $user->id);
+            ->where(function ($query) use ($user) {
+                $query->whereHas('users', function ($subQuery) use ($user) {
+                    $subQuery->where('users.id', $user->id);
+                })->orWhereHas('registrations', function ($subQuery) use ($user) {
+                    $subQuery->where('user_id', $user->id)
+                        ->where('status', 'selected');
+                });
             })
             ->exists();
     }
 
     private function totalWfhCount(User $user, WfhDate $currentDate): int
     {
-        return DB::table('wfh_date_user')
+        $pivotIds = DB::table('wfh_date_user')
             ->where('user_id', $user->id)
             ->where('wfh_date_id', '!=', $currentDate->id)
-            ->count();
+            ->pluck('wfh_date_id');
+
+        $registrationIds = WfhRegistration::where('user_id', $user->id)
+            ->where('wfh_date_id', '!=', $currentDate->id)
+            ->where('status', 'selected')
+            ->pluck('wfh_date_id');
+
+        return $pivotIds->merge($registrationIds)->unique()->count();
+    }
+
+    private function ensureRegistrationsFromAssignedUsers(WfhDate $wfhDate): void
+    {
+        $assignedUserIds = DB::table('wfh_date_user')
+            ->where('wfh_date_id', $wfhDate->id)
+            ->pluck('user_id');
+
+        foreach ($assignedUserIds as $userId) {
+            WfhRegistration::firstOrCreate([
+                'wfh_date_id' => $wfhDate->id,
+                'user_id' => $userId,
+            ], [
+                'status' => 'selected',
+                'selected_at' => now(),
+                'not_selected_reason' => null,
+            ]);
+        }
     }
 }

@@ -92,6 +92,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])
 Route::prefix('pegawai')->name('pegawai.')->middleware(['auth', 'role:pegawai,atasan'])->group(function () {
     Route::get('wfh-registrations', 'Pegawai\WfhRegistrationController@index')->name('wfh-registrations.index');
     Route::post('wfh-registrations/{wfhDate}', 'Pegawai\WfhRegistrationController@store')->name('wfh-registrations.store');
+    Route::delete('wfh-registrations/{wfhDate}', 'Pegawai\WfhRegistrationController@destroy')->name('wfh-registrations.destroy');
     Route::get('wfh-registrations/{wfhDate}/letter', 'Pegawai\WfhRegistrationController@letter')->name('wfh-registrations.letter');
     Route::get('laporan/download/all-pdf', 'Pegawai\LaporanController@downloadAllPdf')->name('laporan.download-all-pdf');
     Route::resource('laporan', 'Pegawai\LaporanController');

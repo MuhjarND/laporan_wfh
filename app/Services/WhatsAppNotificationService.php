@@ -346,6 +346,42 @@ class WhatsAppNotificationService
         return $this->send($user->phone, $message);
     }
 
+    public function sendWfhReplacementSelected(User $user, WfhDate $wfhDate)
+    {
+        if (!$user->phone) {
+            return false;
+        }
+
+        $accessUrl = URL::temporarySignedRoute(
+            'wfh-letter-link.open',
+            now()->addDays(14),
+            ['wfhDate' => $wfhDate->id, 'user' => $user->id, 'type' => 'status']
+        );
+
+        $message = implode("\n", [
+            '*[NOTIF LAPWFH]*',
+            '',
+            "Assalamu'alaikum wr wb.",
+            '',
+            'Yth. Bapak/Ibu ' . $user->name . ',',
+            '',
+            'Berdasarkan seleksi ulang sistem, Saudara/i berhak mengikuti WFH karena terdapat peserta yang membatalkan pendaftaran.',
+            '',
+            'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
+            'Keterangan: ' . ($wfhDate->keterangan ?: '-'),
+            '',
+            'Silakan melihat status pendaftaran melalui tautan berikut:',
+            $accessUrl,
+            '',
+            'Terima kasih.',
+            "Wassalamu'alaikum wr wb.",
+            '',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
+        ]);
+
+        return $this->send($user->phone, $message);
+    }
+
     public function send($phone, $message)
     {
         if (!$this->notificationsEnabled()) {

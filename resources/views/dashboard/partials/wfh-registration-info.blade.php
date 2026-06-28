@@ -3,15 +3,18 @@
     $registration = $info['next_registration'];
     $wfhDate = $registration ? $registration->wfhDate : null;
     $statusLabels = [
-        'registered' => ['class' => 'badge-info', 'text' => 'Terdaftar'],
+        'registered' => ['class' => 'badge-info', 'text' => 'Menunggu Seleksi Sistem'],
         'selected' => ['class' => 'badge-success', 'text' => 'Terpilih'],
         'not_selected' => ['class' => 'badge-secondary', 'text' => 'Tidak Terpilih'],
     ];
     $status = $registration ? ($statusLabels[$registration->status] ?? ['class' => 'badge-secondary', 'text' => ucfirst($registration->status)]) : null;
+    if ($registration && $wfhDate && $wfhDate->letter_status !== 'approved') {
+        $status = ['class' => 'badge-info', 'text' => 'Menunggu Seleksi Sistem'];
+    }
     $alertClass = 'alert-info';
-    if ($registration && $registration->status === 'selected') {
+    if ($registration && $wfhDate && $wfhDate->letter_status === 'approved' && $registration->status === 'selected') {
         $alertClass = 'alert-success';
-    } elseif ($registration && $registration->status === 'registered') {
+    } elseif ($registration && (!$wfhDate || $wfhDate->letter_status !== 'approved' || $registration->status === 'registered')) {
         $alertClass = 'alert-warning';
     } elseif ($registration && $registration->status === 'not_selected') {
         $alertClass = 'alert-secondary';
@@ -31,8 +34,10 @@
                 @if($wfhDate->keterangan)
                     <div class="small mt-1"><strong>Keterangan:</strong> {{ $wfhDate->keterangan }}</div>
                 @endif
-                @if($registration->status === 'not_selected' && $registration->not_selected_reason)
+                @if($wfhDate->letter_status === 'approved' && $registration->status === 'not_selected' && $registration->not_selected_reason)
                     <div class="small mt-1"><strong>Alasan tidak terpilih:</strong> {{ $registration->not_selected_reason }}</div>
+                @elseif($wfhDate->letter_status !== 'approved')
+                    <div class="small mt-1">Pendaftaran diterima dan akan diseleksi oleh sistem terlebih dahulu.</div>
                 @endif
                 <div class="small mt-1">
                     Total pendaftaran aktif: {{ $info['upcoming_count'] }}.

@@ -125,7 +125,7 @@
                         <th>Tanggal</th>
                         <th>Hari</th>
                         <th>Pendaftar</th>
-                        <th>Terpilih / Kuota</th>
+                        <th>Terseleksi / Kuota</th>
                         <th>Status Saya</th>
                         <th>Aksi</th>
                     </tr>
@@ -135,9 +135,10 @@
                     @forelse($wfhDates as $date)
                         @php
                             $myRegistration = $date->registrations->first();
-                            $quotaFull = $date->users_count >= $quota;
                             $window = $registrationWindows[$date->id] ?? null;
                             $registrationOpen = $window ? $window['is_open'] : true;
+                            $finalPublished = $date->letter_status === 'approved';
+                            $canCancelRegistration = $myRegistration && $registrationOpen && !in_array($date->letter_status, ['pending_approval', 'approved'], true);
                         @endphp
                         <tr>
                             <td>
@@ -153,28 +154,27 @@
                             <td>
                                 @if(!$myRegistration)
                                     <span class="badge badge-secondary">Belum Daftar</span>
-                                @elseif($myRegistration->status === 'selected')
+                                @elseif($myRegistration->status === 'selected' && $finalPublished)
                                     <span class="badge badge-success">Terpilih</span>
-                                @elseif($myRegistration->status === 'not_selected')
+                                @elseif($myRegistration->status === 'not_selected' && $finalPublished)
                                     <span class="badge badge-secondary">Tidak Terpilih</span>
                                     @if($myRegistration->not_selected_reason)
                                         <small class="text-muted d-block mt-1">{{ $myRegistration->not_selected_reason }}</small>
                                     @endif
                                 @else
-                                    <span class="badge badge-info">Terdaftar</span>
+                                    <span class="badge badge-info">Menunggu Seleksi Sistem</span>
+                                    <small class="text-muted d-block mt-1">Pendaftaran diterima dan akan diseleksi oleh sistem.</small>
                                 @endif
                             </td>
                             <td>
                                 @if(!$myRegistration)
                                     <form action="{{ route('pegawai.wfh-registrations.store', $date) }}" method="POST" onsubmit="return confirm('Daftar WFH pada tanggal ini?');">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-primary" {{ ($quotaFull || !$registrationOpen) ? 'disabled' : '' }}>
+                                        <button type="submit" class="btn btn-sm btn-primary" {{ !$registrationOpen ? 'disabled' : '' }}>
                                             <i class="fas fa-check mr-1"></i> Daftar
                                         </button>
                                     </form>
-                                    @if($quotaFull)
-                                        <small class="text-muted d-block mt-1">Kuota penuh</small>
-                                    @elseif(!$registrationOpen && $window)
+                                    @if(!$registrationOpen && $window)
                                         <small class="text-muted d-block mt-1">{{ $window['closed_message'] }}</small>
                                     @endif
                                 @elseif($myRegistration->status === 'selected' && $date->letter_status === 'approved')
@@ -184,7 +184,16 @@
                                 @elseif($myRegistration->status === 'selected' && $date->letter_status === 'pending_approval')
                                     <span class="text-muted">Surat menunggu TTD Ketua</span>
                                 @else
-                                    <span class="text-muted">Sudah diproses</span>
+                                    <span class="text-muted d-block mb-2">Menunggu seleksi sistem</span>
+                                @endif
+                                @if($canCancelRegistration)
+                                    <form action="{{ route('pegawai.wfh-registrations.destroy', $date) }}" method="POST" onsubmit="return confirm('Batalkan pendaftaran WFH pada tanggal ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times mr-1"></i> Batalkan
+                                        </button>
+                                    </form>
                                 @endif
                             </td>
                         </tr>
@@ -200,9 +209,10 @@
             @forelse($wfhDates as $date)
                 @php
                     $myRegistration = $date->registrations->first();
-                    $quotaFull = $date->users_count >= $quota;
                     $window = $registrationWindows[$date->id] ?? null;
                     $registrationOpen = $window ? $window['is_open'] : true;
+                    $finalPublished = $date->letter_status === 'approved';
+                    $canCancelRegistration = $myRegistration && $registrationOpen && !in_array($date->letter_status, ['pending_approval', 'approved'], true);
                 @endphp
                 <div class="wfh-date-card">
                     <div class="wfh-date-card-header">
@@ -213,12 +223,12 @@
                         <div class="text-right">
                             @if(!$myRegistration)
                                 <span class="badge badge-secondary">Belum Daftar</span>
-                            @elseif($myRegistration->status === 'selected')
+                            @elseif($myRegistration->status === 'selected' && $finalPublished)
                                 <span class="badge badge-success">Terpilih</span>
-                            @elseif($myRegistration->status === 'not_selected')
+                            @elseif($myRegistration->status === 'not_selected' && $finalPublished)
                                 <span class="badge badge-secondary">Tidak Terpilih</span>
                             @else
-                                <span class="badge badge-info">Terdaftar</span>
+                                <span class="badge badge-info">Menunggu Seleksi</span>
                             @endif
                         </div>
                     </div>
@@ -236,14 +246,18 @@
                                 <strong>{{ $date->registrations_count }} pegawai</strong>
                             </div>
                             <div class="wfh-date-stat">
-                                <span>Terpilih / Kuota</span>
+                                <span>Terseleksi / Kuota</span>
                                 <strong>{{ $date->users_count }} / {{ $quota }} pegawai</strong>
                             </div>
                         </div>
 
-                        @if($myRegistration && $myRegistration->status === 'not_selected' && $myRegistration->not_selected_reason)
+                        @if($myRegistration && $myRegistration->status === 'not_selected' && $finalPublished && $myRegistration->not_selected_reason)
                             <div class="alert alert-light border py-2 px-3 mb-2">
                                 <small class="text-muted"><strong>Alasan:</strong> {{ $myRegistration->not_selected_reason }}</small>
+                            </div>
+                        @elseif($myRegistration && !$finalPublished)
+                            <div class="alert alert-info py-2 px-3 mb-2">
+                                <small>Pendaftaran diterima dan akan diseleksi oleh sistem terlebih dahulu.</small>
                             </div>
                         @endif
 
@@ -251,13 +265,11 @@
                             @if(!$myRegistration)
                                 <form action="{{ route('pegawai.wfh-registrations.store', $date) }}" method="POST" onsubmit="return confirm('Daftar WFH pada tanggal ini?');">
                                     @csrf
-                                    <button type="submit" class="btn btn-primary" {{ ($quotaFull || !$registrationOpen) ? 'disabled' : '' }}>
+                                    <button type="submit" class="btn btn-primary" {{ !$registrationOpen ? 'disabled' : '' }}>
                                         <i class="fas fa-check mr-1"></i> Daftar WFH
                                     </button>
                                 </form>
-                                @if($quotaFull)
-                                    <small class="text-muted">Kuota penuh</small>
-                                @elseif(!$registrationOpen && $window)
+                                @if(!$registrationOpen && $window)
                                     <small class="text-muted">{{ $window['closed_message'] }}</small>
                                 @endif
                             @elseif($myRegistration->status === 'selected' && $date->letter_status === 'approved')
@@ -267,7 +279,16 @@
                             @elseif($myRegistration->status === 'selected' && $date->letter_status === 'pending_approval')
                                 <small class="text-muted"><i class="fas fa-hourglass-half mr-1"></i>Surat menunggu TTD Ketua</small>
                             @else
-                                <small class="text-muted"><i class="fas fa-check-circle mr-1"></i>Sudah diproses</small>
+                                <small class="text-muted"><i class="fas fa-check-circle mr-1"></i>Menunggu seleksi sistem</small>
+                            @endif
+                            @if($canCancelRegistration)
+                                <form action="{{ route('pegawai.wfh-registrations.destroy', $date) }}" method="POST" onsubmit="return confirm('Batalkan pendaftaran WFH pada tanggal ini?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="fas fa-times mr-1"></i> Batalkan Pendaftaran
+                                    </button>
+                                </form>
                             @endif
                         </div>
                     </div>

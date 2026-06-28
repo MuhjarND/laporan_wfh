@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pegawai;
 
 use App\Http\Controllers\Controller;
+use App\Services\WhatsAppNotificationService;
 use App\Services\WfhRegistrationService;
 use App\User;
 use App\WfhDate;
@@ -53,14 +54,47 @@ class WfhRegistrationController extends Controller
                 ->with('error', $message);
         }
 
-        $registration = $registrationService->register(auth()->user(), $wfhDate);
-
-        $statusMessage = $registration->status === 'selected'
-            ? 'Pendaftaran berhasil. Anda terpilih untuk WFH pada tanggal ' . $wfhDate->tanggal->format('d/m/Y') . '.'
-            : 'Pendaftaran berhasil. Anda belum terpilih untuk WFH pada tanggal ' . $wfhDate->tanggal->format('d/m/Y') . '. ' . ($registration->not_selected_reason ?: 'Status mengikuti hasil seleksi sistem.');
+        $registrationService->register(auth()->user(), $wfhDate);
 
         return redirect()->route('pegawai.wfh-registrations.index')
-            ->with('success', $statusMessage);
+            ->with('success', 'Pendaftaran berhasil. Data Anda masuk ke daftar seleksi sistem untuk WFH tanggal ' . $wfhDate->tanggal->format('d/m/Y') . '. Hasil final akan diinformasikan setelah surat tugas disetujui.');
+    }
+
+    public function destroy(WfhDate $wfhDate, WfhRegistrationService $registrationService, WhatsAppNotificationService $whatsApp)
+    {
+        [$canCancel, $message] = $registrationService->canCancel(auth()->user(), $wfhDate);
+
+        if (!$canCancel) {
+            return redirect()->route('pegawai.wfh-registrations.index')
+                ->with('error', $message);
+        }
+
+        $replacementRegistrations = $registrationService->cancel(auth()->user(), $wfhDate);
+        $sent = 0;
+        $failed = 0;
+        $withoutPhone = 0;
+
+        foreach ($replacementRegistrations as $registration) {
+            $user = $registration->user;
+            if (!$user || !$user->phone) {
+                $withoutPhone++;
+                continue;
+            }
+
+            if ($whatsApp->sendWfhReplacementSelected($user, $wfhDate)) {
+                $sent++;
+            } else {
+                $failed++;
+            }
+        }
+
+        $message = 'Pendaftaran WFH tanggal ' . $wfhDate->tanggal->format('d/m/Y') . ' berhasil dibatalkan.';
+        if ($replacementRegistrations->isNotEmpty()) {
+            $message .= ' Sistem telah memilih pengganti. Notifikasi pengganti diproses: terkirim ' . $sent . ', tanpa nomor WA ' . $withoutPhone . ', gagal ' . $failed . '.';
+        }
+
+        return redirect()->route('pegawai.wfh-registrations.index')
+            ->with('success', $message);
     }
 
     public function letter(WfhDate $wfhDate)

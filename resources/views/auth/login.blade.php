@@ -6,7 +6,7 @@
     <title>Login - SIAP WFH PTA Papua Barat</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo4.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo5.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -68,13 +68,6 @@
         .login-form { width: 100%; max-width: 600px; }
         .login-form h3 { color: #0f4c3a; font-weight: 700; font-size: 1.7rem; margin-bottom: 4px; }
         .login-form p.subtitle { color: #6b7280; font-size: .95rem; margin-bottom: 12px; }
-        .login-desc {
-            color: #6b7280;
-            font-size: .86rem;
-            line-height: 1.55;
-            margin-bottom: 28px;
-            max-width: 520px;
-        }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; color: #374151; font-weight: 600; font-size: .82rem; margin-bottom: 6px; }
         .input-wrap {
@@ -145,7 +138,7 @@
 <body>
     <div class="login-left">
         <div class="logo-area">
-            <div class="logo-icon"><img src="{{ asset('logo4.png') }}" alt="Logo Aplikasi"></div>
+            <div class="logo-icon"><img src="{{ asset('logo5.png') }}" alt="Logo Aplikasi"></div>
             <h1>SIAP WFH</h1>
             <h2>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</h2>
             <div class="divider"></div>
@@ -155,14 +148,13 @@
     <div class="login-right">
         <div class="login-form">
             <div class="mobile-header">
-                <div class="m-icon"><img src="{{ asset('logo4.png') }}" alt="Logo Aplikasi"></div>
+                <div class="m-icon"><img src="{{ asset('logo5.png') }}" alt="Logo Aplikasi"></div>
                 <h3>SIAP WFH</h3>
                 <p>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</p>
             </div>
 
             <h3>Selamat Datang 👋</h3>
             <p class="subtitle">Masuk ke akun Anda untuk melanjutkan</p>
-            <p class="login-desc">Gunakan akun yang telah diberikan untuk mengakses pendaftaran WFH, pengisian kegiatan harian, unggah eviden, dan pemantauan status persetujuan.</p>
 
             @if(session('error'))
                 <div class="alert-error"><i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}</div>

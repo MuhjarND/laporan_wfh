@@ -7,7 +7,7 @@
     <title>Menghubungkan - SIAP WFH</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo4.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo5.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <style>
         * { box-sizing: border-box; }
@@ -54,7 +54,7 @@
 </head>
 <body>
     <div class="box">
-        <img src="{{ asset('logo4.png') }}" alt="Logo Aplikasi" class="logo">
+        <img src="{{ asset('logo5.png') }}" alt="Logo Aplikasi" class="logo">
         <h1>Menghubungkan Akun</h1>
         <p>Mohon tunggu, Anda sedang diarahkan ke dashboard.</p>
         <form id="autologinForm" method="POST" action="{{ route('autologin.login') }}">

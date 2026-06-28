@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Laporan WFH') - PTA Papua Barat</title>
-    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <meta name="theme-color" content="#0f4c3a">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
@@ -51,15 +54,15 @@
             border-bottom: 1px solid rgba(255,255,255,0.08);
             padding: 14px 15px;
             display: grid;
-            grid-template-columns: 34px 1fr;
+            grid-template-columns: 42px 1fr;
             grid-template-rows: auto auto;
             column-gap: 10px;
             align-items: center;
         }
         .main-sidebar .brand-logo-img {
             grid-row: 1 / span 2;
-            width: 34px;
-            height: 34px;
+            width: 42px;
+            height: 42px;
             object-fit: contain;
             filter: drop-shadow(0 1px 2px rgba(0,0,0,.18));
         }
@@ -380,7 +383,7 @@
     <!-- Sidebar -->
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <a href="{{ route('dashboard') }}" class="brand-link">
-            <img src="{{ asset('logo.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
+            <img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
             <span class="brand-text">Laporan WFH</span>
             <small>PTA Papua Barat</small>
         </a>

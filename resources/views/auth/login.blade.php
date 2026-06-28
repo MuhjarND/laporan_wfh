@@ -4,7 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Login - Laporan WFH PTA Papua Barat</title>
-    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <meta name="theme-color" content="#0f4c3a">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
@@ -25,10 +28,10 @@
         }
         .login-left .logo-area { text-align: center; z-index: 1; }
         .login-left .logo-icon {
-            width: 80px; height: 80px; background: rgba(232,184,40,0.15);
-            border: 2px solid rgba(232,184,40,0.3); border-radius: 20px;
+            width: 112px; height: 112px;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 20px; padding: 12px;
+            margin: 0 auto 22px;
+            filter: drop-shadow(0 10px 24px rgba(0,0,0,.18));
         }
         .login-left .logo-icon img,
         .mobile-header .m-icon img {
@@ -110,9 +113,9 @@
         /* Mobile header - shown only when left panel is hidden */
         .mobile-header { display: none; text-align: center; margin-bottom: 24px; }
         .mobile-header .m-icon {
-            width: 56px; height: 56px; background: #ecfdf5; border-radius: 14px;
+            width: 74px; height: 74px;
             display: inline-flex; align-items: center; justify-content: center;
-            margin-bottom: 10px; padding: 8px;
+            margin-bottom: 12px;
         }
         .mobile-header h3 { color: #0f4c3a; font-weight: 700; font-size: 1.1rem; }
         .mobile-header p { color: #6b7280; font-size: .78rem; }
@@ -122,7 +125,7 @@
 <body>
     <div class="login-left">
         <div class="logo-area">
-            <div class="logo-icon"><img src="{{ asset('logo.png') }}" alt="Logo Aplikasi"></div>
+            <div class="logo-icon"><img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi"></div>
             <h1>Laporan WFH</h1>
             <h2>Pengadilan Tinggi Agama Papua Barat</h2>
             <div class="divider"></div>
@@ -132,7 +135,7 @@
     <div class="login-right">
         <div class="login-form">
             <div class="mobile-header">
-                <div class="m-icon"><img src="{{ asset('logo.png') }}" alt="Logo Aplikasi"></div>
+                <div class="m-icon"><img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi"></div>
                 <h3>Laporan WFH</h3>
                 <p>PTA Papua Barat</p>
             </div>

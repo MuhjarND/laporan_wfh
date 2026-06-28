@@ -6,7 +6,7 @@
     <title>Login - SIAP WFH PTA Papua Barat</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo3.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo4.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -28,9 +28,9 @@
         }
         .login-left .logo-area { text-align: center; z-index: 1; }
         .login-left .logo-icon {
-            width: 112px; height: 112px;
+            width: 126px; height: 126px;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 22px;
+            margin: 0 auto 20px;
             filter: drop-shadow(0 10px 24px rgba(0,0,0,.18));
         }
         .login-left .logo-icon img,
@@ -40,20 +40,26 @@
             object-fit: contain;
             display: block;
         }
-        .login-left h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+        .login-left h1 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
         .login-left h2 {
-            font-size: .95rem;
-            font-weight: 500;
-            color: rgba(255,255,255,.82);
-            margin: 0 auto 6px;
-            max-width: 420px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: rgba(255,255,255,.92);
+            margin: 0 auto 8px;
+            max-width: 460px;
             line-height: 1.45;
         }
         .login-left .divider {
             width: 60px; height: 3px; background: #e8b828; border-radius: 2px;
             margin: 16px auto;
         }
-        .login-left p { font-size: .82rem; color: rgba(255,255,255,.5); max-width: 300px; text-align: center; line-height: 1.5; }
+        .login-left p {
+            font-size: .88rem;
+            color: rgba(255,255,255,.68);
+            max-width: 430px;
+            text-align: center;
+            line-height: 1.6;
+        }
 
         .login-right {
             flex: 0 0 42.5%; display: flex; align-items: center; justify-content: center;
@@ -61,7 +67,14 @@
         }
         .login-form { width: 100%; max-width: 600px; }
         .login-form h3 { color: #0f4c3a; font-weight: 700; font-size: 1.7rem; margin-bottom: 4px; }
-        .login-form p.subtitle { color: #6b7280; font-size: .95rem; margin-bottom: 34px; }
+        .login-form p.subtitle { color: #6b7280; font-size: .95rem; margin-bottom: 12px; }
+        .login-desc {
+            color: #6b7280;
+            font-size: .86rem;
+            line-height: 1.55;
+            margin-bottom: 28px;
+            max-width: 520px;
+        }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; color: #374151; font-weight: 600; font-size: .82rem; margin-bottom: 6px; }
         .input-wrap {
@@ -125,30 +138,31 @@
             margin-bottom: 12px;
         }
         .mobile-header h3 { color: #0f4c3a; font-weight: 700; font-size: 1.1rem; }
-        .mobile-header p { color: #6b7280; font-size: .78rem; }
+        .mobile-header p { color: #6b7280; font-size: .78rem; line-height: 1.4; }
         @media(max-width:900px) { .mobile-header { display: block; } }
     </style>
 </head>
 <body>
     <div class="login-left">
         <div class="logo-area">
-            <div class="logo-icon"><img src="{{ asset('logo3.png') }}" alt="Logo Aplikasi"></div>
+            <div class="logo-icon"><img src="{{ asset('logo4.png') }}" alt="Logo Aplikasi"></div>
             <h1>SIAP WFH</h1>
             <h2>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</h2>
             <div class="divider"></div>
-            <p>Pengadilan Tinggi Agama Papua Barat</p>
+            <p>Aplikasi internal untuk pendaftaran WFH, pengisian kegiatan, pelaporan eviden, monitoring, dan proses persetujuan secara elektronik.</p>
         </div>
     </div>
     <div class="login-right">
         <div class="login-form">
             <div class="mobile-header">
-                <div class="m-icon"><img src="{{ asset('logo3.png') }}" alt="Logo Aplikasi"></div>
+                <div class="m-icon"><img src="{{ asset('logo4.png') }}" alt="Logo Aplikasi"></div>
                 <h3>SIAP WFH</h3>
                 <p>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</p>
             </div>
 
             <h3>Selamat Datang 👋</h3>
             <p class="subtitle">Masuk ke akun Anda untuk melanjutkan</p>
+            <p class="login-desc">Gunakan akun yang telah diberikan untuk mengakses pendaftaran WFH, pengisian kegiatan harian, unggah eviden, dan pemantauan status persetujuan.</p>
 
             @if(session('error'))
                 <div class="alert-error"><i class="fas fa-exclamation-circle mr-1"></i> {{ session('error') }}</div>

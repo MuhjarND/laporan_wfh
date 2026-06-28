@@ -7,7 +7,7 @@
     <title>@yield('title', 'SIAP WFH') - PTA Papua Barat</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo3.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo4.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -52,24 +52,43 @@
         .main-sidebar .brand-link {
             background: rgba(0,0,0,0.15) !important;
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 14px 15px;
+            padding: 14px 16px;
             display: grid;
-            grid-template-columns: 42px 1fr;
+            grid-template-columns: 48px minmax(0, 1fr);
             grid-template-rows: auto auto;
-            column-gap: 10px;
+            column-gap: 12px;
             align-items: center;
+            min-height: 92px;
+            white-space: normal !important;
+            overflow: hidden;
         }
         .main-sidebar .brand-logo-img {
             grid-row: 1 / span 2;
-            width: 42px;
-            height: 42px;
+            width: 48px;
+            height: 48px;
             object-fit: contain;
             filter: drop-shadow(0 1px 2px rgba(0,0,0,.18));
         }
         .main-sidebar .brand-link .brand-text {
-            color: #fff !important; font-weight: 700; font-size: 1rem;
+            color: #fff !important;
+            font-weight: 800;
+            font-size: 1.05rem;
+            line-height: 1.05;
+            min-width: 0;
         }
-        .main-sidebar .brand-link small { color: var(--accent) !important; margin-left: 0 !important; }
+        .main-sidebar .brand-link small {
+            color: var(--accent) !important;
+            margin-left: 0 !important;
+            min-width: 0;
+            max-width: 100%;
+            display: block;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            line-height: 1.25;
+            font-size: .68rem;
+            font-weight: 600;
+            opacity: .95;
+        }
         .sidebar .user-panel {
             border-bottom: 1px solid rgba(255,255,255,0.08);
             padding: 15px 12px;
@@ -383,7 +402,7 @@
     <!-- Sidebar -->
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <a href="{{ route('dashboard') }}" class="brand-link">
-            <img src="{{ asset('logo3.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
+            <img src="{{ asset('logo4.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
             <span class="brand-text">SIAP WFH</span>
             <small>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</small>
         </a>

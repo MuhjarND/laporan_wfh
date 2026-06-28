@@ -59,7 +59,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($atasan->phone, $message);
@@ -92,7 +92,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($laporan->user->phone, $message);
@@ -124,7 +124,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($laporan->user->phone, $message);
@@ -143,7 +143,7 @@ class WhatsAppNotificationService
             '',
             'Yth. Bapak/Ibu ' . $user->name . ',',
             '',
-            'Berikut kami sampaikan informasi akun untuk mengakses Sistem Laporan WFH PTA Papua Barat.',
+            'Berikut kami sampaikan informasi akun untuk mengakses SIAP WFH PTA Papua Barat.',
             '',
             'Username (NIP): ' . $user->nip,
             'Password: ' . $plainPassword,
@@ -156,7 +156,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);
@@ -181,7 +181,7 @@ class WhatsAppNotificationService
             '',
             'Yth. Bapak/Ibu ' . $user->name . ',',
             '',
-            'Berdasarkan monitoring Sistem Laporan WFH, Saudara/i tercatat belum mengisi laporan kegiatan WFH untuk tanggal berikut:',
+            'Berdasarkan monitoring SIAP WFH, Saudara/i tercatat belum mengisi laporan kegiatan WFH untuk tanggal berikut:',
             '',
             'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
             'Keterangan: ' . ($wfhDate->keterangan ?: '-'),
@@ -194,7 +194,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);
@@ -219,7 +219,7 @@ class WhatsAppNotificationService
             '',
             'Yth. Bapak/Ibu ' . $user->name . ',',
             '',
-            'Berdasarkan monitoring Sistem Laporan WFH, Saudara/i tercatat sudah mengisi kegiatan WFH namun belum mengirim/mengajukan laporan kepada atasan.',
+            'Berdasarkan monitoring SIAP WFH, Saudara/i tercatat sudah mengisi kegiatan WFH namun belum mengirim/mengajukan laporan kepada atasan.',
             '',
             'Tanggal WFH: ' . $wfhDate->tanggal->format('d/m/Y'),
             'Periode: ' . $wfhDate->tanggal->format('m/Y'),
@@ -232,7 +232,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);
@@ -269,7 +269,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);
@@ -303,7 +303,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($approver->phone, $message);
@@ -340,7 +340,7 @@ class WhatsAppNotificationService
             'Terima kasih.',
             "Wassalamu'alaikum wr wb.",
             '',
-            '- *Sistem Laporan WFH PTA Papua Barat*',
+            '- *SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat*',
         ]);
 
         return $this->send($user->phone, $message);

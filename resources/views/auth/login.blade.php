@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Login - Laporan WFH PTA Papua Barat</title>
+    <title>Login - SIAP WFH PTA Papua Barat</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo3.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -40,8 +40,15 @@
             object-fit: contain;
             display: block;
         }
-        .login-left h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
-        .login-left h2 { font-size: .95rem; font-weight: 400; color: rgba(255,255,255,.7); margin-bottom: 6px; }
+        .login-left h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+        .login-left h2 {
+            font-size: .95rem;
+            font-weight: 500;
+            color: rgba(255,255,255,.82);
+            margin: 0 auto 6px;
+            max-width: 420px;
+            line-height: 1.45;
+        }
         .login-left .divider {
             width: 60px; height: 3px; background: #e8b828; border-radius: 2px;
             margin: 16px auto;
@@ -125,19 +132,19 @@
 <body>
     <div class="login-left">
         <div class="logo-area">
-            <div class="logo-icon"><img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi"></div>
-            <h1>Laporan WFH</h1>
-            <h2>Pengadilan Tinggi Agama Papua Barat</h2>
+            <div class="logo-icon"><img src="{{ asset('logo3.png') }}" alt="Logo Aplikasi"></div>
+            <h1>SIAP WFH</h1>
+            <h2>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</h2>
             <div class="divider"></div>
-            <p>Sistem pelaporan kegiatan Work From Home untuk pegawai PTA Papua Barat</p>
+            <p>Pengadilan Tinggi Agama Papua Barat</p>
         </div>
     </div>
     <div class="login-right">
         <div class="login-form">
             <div class="mobile-header">
-                <div class="m-icon"><img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi"></div>
-                <h3>Laporan WFH</h3>
-                <p>PTA Papua Barat</p>
+                <div class="m-icon"><img src="{{ asset('logo3.png') }}" alt="Logo Aplikasi"></div>
+                <h3>SIAP WFH</h3>
+                <p>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</p>
             </div>
 
             <h3>Selamat Datang 👋</h3>

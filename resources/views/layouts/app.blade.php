@@ -7,10 +7,10 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'SIAP WFH') }}</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo3.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
 
     <!-- Scripts -->
@@ -28,8 +28,8 @@
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi" style="height:32px;width:32px;object-fit:contain;margin-right:8px;">
-                    {{ config('app.name', 'Laravel') }}
+                    <img src="{{ asset('logo3.png') }}" alt="Logo Aplikasi" style="height:32px;width:32px;object-fit:contain;margin-right:8px;">
+                    {{ config('app.name', 'SIAP WFH') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>

@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Laporan WFH') - PTA Papua Barat</title>
+    <title>@yield('title', 'SIAP WFH') - PTA Papua Barat</title>
     <meta name="theme-color" content="#0f4c3a">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
-    <link rel="icon" type="image/png" href="{{ asset('logo2.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('logo3.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('pwa/icon-192.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -383,9 +383,9 @@
     <!-- Sidebar -->
     <aside class="main-sidebar sidebar-dark-primary elevation-0">
         <a href="{{ route('dashboard') }}" class="brand-link">
-            <img src="{{ asset('logo2.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
-            <span class="brand-text">Laporan WFH</span>
-            <small>PTA Papua Barat</small>
+            <img src="{{ asset('logo3.png') }}" alt="Logo Aplikasi" class="brand-logo-img">
+            <span class="brand-text">SIAP WFH</span>
+            <small>Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat</small>
         </a>
         <div class="sidebar">
             <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
@@ -610,7 +610,7 @@
     </div>
     <footer class="main-footer">
         <div class="float-right d-none d-sm-block"><b>v</b>1.0</div>
-        <strong>&copy; {{ date('Y') }} PTA Papua Barat.</strong> Sistem Laporan Work From Home
+        <strong>&copy; {{ date('Y') }} PTA Papua Barat.</strong> SIAP WFH - Sistem Aplikasi Pelaporan Work From Home PTA Papua Barat
     </footer>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

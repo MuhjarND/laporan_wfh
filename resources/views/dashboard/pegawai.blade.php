@@ -5,6 +5,7 @@
 
 @section('content')
 @include('dashboard.partials.signature-alert')
+@include('dashboard.partials.wfh-registration-info')
 
 <div class="row">
     <div class="col-lg-3 col-6">
@@ -67,9 +68,6 @@
                 @endif
             </div>
         </div>
-    </div>
-    <div class="col-lg-6">
-        @include('dashboard.partials.wfh-registration-info')
     </div>
 </div>
 <div class="row">

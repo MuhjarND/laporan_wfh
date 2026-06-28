@@ -5,6 +5,7 @@
 
 @section('content')
 @include('dashboard.partials.signature-alert')
+@include('dashboard.partials.wfh-registration-info')
 
 <div class="row">
     <div class="col-lg-3 col-6">
@@ -37,7 +38,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-lg-5">
+    <div class="col-lg-6">
         <div class="card">
             <div class="card-header d-flex align-items-center">
                 <h3 class="card-title"><i class="fas fa-calendar-alt mr-2" style="color:var(--primary);"></i>Laporan Saya Bulan Ini</h3>
@@ -67,9 +68,6 @@
                 @endif
             </div>
         </div>
-    </div>
-    <div class="col-lg-7">
-        @include('dashboard.partials.wfh-registration-info')
     </div>
 </div>
 <div class="row">

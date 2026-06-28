@@ -69,8 +69,6 @@
             </div>
         </div>
     </div>
-</div>
-<div class="row">
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header"><h3 class="card-title"><i class="fas fa-history mr-2" style="color:var(--primary);"></i>Kegiatan Terbaru</h3></div>

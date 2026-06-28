@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
     <title>Menghubungkan - Laporan WFH</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <style>
         * { box-sizing: border-box; }
         body {
@@ -29,6 +30,12 @@
             text-align: center;
         }
         h1 { margin: 0 0 10px; font-size: 1.25rem; color: #0f4c3a; }
+        .logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            margin-bottom: 14px;
+        }
         p { margin: 0 0 18px; color: #4b5563; line-height: 1.5; }
         button {
             border: 0;
@@ -44,6 +51,7 @@
 </head>
 <body>
     <div class="box">
+        <img src="{{ asset('logo.png') }}" alt="Logo Aplikasi" class="logo">
         <h1>Menghubungkan Akun</h1>
         <p>Mohon tunggu, Anda sedang diarahkan ke dashboard.</p>
         <form id="autologinForm" method="POST" action="{{ route('autologin.login') }}">

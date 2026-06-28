@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Login - Laporan WFH PTA Papua Barat</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
@@ -27,7 +28,14 @@
             width: 80px; height: 80px; background: rgba(232,184,40,0.15);
             border: 2px solid rgba(232,184,40,0.3); border-radius: 20px;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 20px; font-size: 2rem; color: #e8b828;
+            margin: 0 auto 20px; padding: 12px;
+        }
+        .login-left .logo-icon img,
+        .mobile-header .m-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
         .login-left h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
         .login-left h2 { font-size: .95rem; font-weight: 400; color: rgba(255,255,255,.7); margin-bottom: 6px; }
@@ -104,7 +112,7 @@
         .mobile-header .m-icon {
             width: 56px; height: 56px; background: #ecfdf5; border-radius: 14px;
             display: inline-flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: #0f4c3a; margin-bottom: 10px;
+            margin-bottom: 10px; padding: 8px;
         }
         .mobile-header h3 { color: #0f4c3a; font-weight: 700; font-size: 1.1rem; }
         .mobile-header p { color: #6b7280; font-size: .78rem; }
@@ -114,7 +122,7 @@
 <body>
     <div class="login-left">
         <div class="logo-area">
-            <div class="logo-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="logo-icon"><img src="{{ asset('logo.png') }}" alt="Logo Aplikasi"></div>
             <h1>Laporan WFH</h1>
             <h2>Pengadilan Tinggi Agama Papua Barat</h2>
             <div class="divider"></div>
@@ -124,7 +132,7 @@
     <div class="login-right">
         <div class="login-form">
             <div class="mobile-header">
-                <div class="m-icon"><i class="fas fa-file-alt"></i></div>
+                <div class="m-icon"><img src="{{ asset('logo.png') }}" alt="Logo Aplikasi"></div>
                 <h3>Laporan WFH</h3>
                 <p>PTA Papua Barat</p>
             </div>

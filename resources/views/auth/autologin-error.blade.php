@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login Tidak Valid - Laporan WFH</title>
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <style>
         * { box-sizing: border-box; }
         body {
@@ -28,6 +29,12 @@
             text-align: center;
         }
         h1 { margin: 0 0 10px; font-size: 1.25rem; color: #0f4c3a; }
+        .logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            margin-bottom: 14px;
+        }
         p { margin: 0 0 18px; color: #4b5563; line-height: 1.5; }
         a {
             display: inline-block;
@@ -42,6 +49,7 @@
 </head>
 <body>
     <div class="box">
+        <img src="{{ asset('logo.png') }}" alt="Logo Aplikasi" class="logo">
         <h1>Login Tidak Valid</h1>
         <p>{{ $message }}</p>
         <a href="{{ route('login') }}">Ke Halaman Login</a>

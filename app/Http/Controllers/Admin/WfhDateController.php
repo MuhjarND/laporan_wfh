@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\AppSetting;
 use App\WfhDate;
+use App\WfhRegistration;
 use App\User;
 use App\LaporanWfh;
 use App\Services\WhatsAppNotificationService;
@@ -82,13 +83,15 @@ class WfhDateController extends Controller
             ->with('success', "{$count} tanggal WFH berhasil ditambahkan.");
     }
 
-    public function edit(WfhDate $wfhDate)
+    public function edit(WfhDate $wfhDate, WfhRegistrationService $registrationService)
     {
         $wfhDate->load(['users' => function ($query) {
             $query->orderBy('name');
         }, 'registrations.user']);
 
-        return view('admin.wfh-dates.edit', compact('wfhDate'));
+        $quota = $registrationService->quota();
+
+        return view('admin.wfh-dates.edit', compact('wfhDate', 'quota'));
     }
 
     public function update(Request $request, WfhDate $wfhDate, WfhRegistrationService $registrationService)
@@ -126,11 +129,41 @@ class WfhDateController extends Controller
             ->with('success', 'Status tanggal WFH berhasil diperbarui.');
     }
 
-    public function publishLetter(Request $request, WfhDate $wfhDate, WhatsAppNotificationService $whatsApp)
+    public function publishLetter(Request $request, WfhDate $wfhDate, WhatsAppNotificationService $whatsApp, WfhRegistrationService $registrationService)
     {
+        if ($wfhDate->letter_status === 'approved') {
+            return redirect()->back()
+                ->with('error', 'Surat tugas yang sudah disetujui tidak dapat diajukan ulang.');
+        }
+
+        $quota = $registrationService->quota();
+
         $request->validate([
             'letter_number' => 'required|string|max:255',
+            'selected_user_ids' => 'required|array|min:1|max:' . $quota,
+            'selected_user_ids.*' => 'required|integer|distinct|exists:users,id',
         ]);
+
+        $selectedUserIds = collect($request->input('selected_user_ids', []))
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->unique()
+            ->values()
+            ->all();
+
+        $registeredUserIds = $wfhDate->registrations()
+            ->pluck('user_id')
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->all();
+
+        if (!empty(array_diff($selectedUserIds, $registeredUserIds))) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Peserta yang dipilih harus berasal dari daftar pendaftar WFH tanggal ini.');
+        }
 
         $approver = User::find(AppSetting::value('wfh_letter_approver_user_id'));
         if (!$approver || !$approver->is_active) {
@@ -138,6 +171,8 @@ class WfhDateController extends Controller
                 ->withInput()
                 ->with('error', 'Pejabat approval surat belum diset atau tidak aktif. Silakan set di menu Kelola User.');
         }
+
+        $this->applySelectedUsersForLetter($wfhDate, $selectedUserIds);
 
         $selectedUsers = $this->selectedUsersForLetter($wfhDate);
         if ($selectedUsers->isEmpty()) {
@@ -391,6 +426,25 @@ class WfhDateController extends Controller
         return $users->sortBy(function ($user) {
             return sprintf('%03d-%s', $this->jabatanPriority($user), strtolower($user->name));
         })->values();
+    }
+
+    private function applySelectedUsersForLetter(WfhDate $wfhDate, array $selectedUserIds)
+    {
+        WfhRegistration::where('wfh_date_id', $wfhDate->id)->update([
+            'status' => 'not_selected',
+            'selected_at' => null,
+            'not_selected_reason' => 'Tidak masuk daftar peserta surat tugas yang diajukan oleh admin.',
+        ]);
+
+        WfhRegistration::where('wfh_date_id', $wfhDate->id)
+            ->whereIn('user_id', $selectedUserIds)
+            ->update([
+                'status' => 'selected',
+                'selected_at' => now(),
+                'not_selected_reason' => null,
+            ]);
+
+        $wfhDate->users()->sync($selectedUserIds);
     }
 
     private function jabatanPriority(User $user)

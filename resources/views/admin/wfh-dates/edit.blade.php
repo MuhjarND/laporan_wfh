@@ -8,6 +8,19 @@
 @endsection
 
 @section('content')
+@php
+    $selectedUserIds = old('selected_user_ids');
+    if ($selectedUserIds === null) {
+        $selectedUserIds = $wfhDate->users->pluck('id')->map(function ($id) {
+            return (string) $id;
+        })->all();
+    } else {
+        $selectedUserIds = array_map('strval', (array) $selectedUserIds);
+    }
+    $registrations = $wfhDate->registrations->sortBy(function ($registration) {
+        return sprintf('%s-%s', $registration->status === 'selected' ? '0' : '1', strtolower(optional($registration->user)->name));
+    });
+@endphp
 <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card">
@@ -37,7 +50,7 @@
                     </div>
                     <div class="alert alert-info mb-0">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Peserta WFH tidak dipilih manual oleh admin. Pegawai mendaftar sendiri, lalu sistem memilih peserta berdasarkan kuota dan prioritas.
+                        Pegawai mendaftar sendiri dan sistem melakukan seleksi awal. Sebelum surat diajukan ke ketua, admin dapat meninjau dan memilih peserta final dari daftar pendaftar.
                     </div>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
@@ -75,13 +88,14 @@
                         </div>
                         <div class="col-md-4">
                             <label class="d-none d-md-block">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary btn-block" {{ $wfhDate->users->isEmpty() ? 'disabled' : '' }}>
+                            <button type="submit" class="btn btn-primary btn-block" {{ ($wfhDate->registrations->isEmpty() || $wfhDate->letter_status === 'approved') ? 'disabled' : '' }}>
                                 <i class="fas fa-paper-plane mr-1"></i> Ajukan Approval
                             </button>
                         </div>
                     </div>
                     <div class="mt-3">
                         <span class="badge badge-info mr-1">{{ $wfhDate->users->count() }} pegawai terpilih</span>
+                        <span class="badge badge-light border mr-1">Kuota: {{ $quota }} pegawai</span>
                         @if($wfhDate->letter_status === 'approved')
                             <span class="badge badge-success mr-1">Sudah TTD: {{ $wfhDate->letter_approved_at ? $wfhDate->letter_approved_at->format('d/m/Y H:i') : '-' }}</span>
                         @elseif($wfhDate->letter_status === 'pending_approval')
@@ -93,10 +107,70 @@
                             <span class="badge badge-secondary">WA: {{ $wfhDate->letter_notified_at->format('d/m/Y H:i') }}</span>
                         @endif
                     </div>
-                    @if($wfhDate->users->isEmpty())
+                    <div class="mt-3">
+                        <label class="mb-2">Pilih Peserta Surat Tugas *</label>
+                        @error('selected_user_ids')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
+                        @error('selected_user_ids.*')<div class="text-danger small mb-2">{{ $message }}</div>@enderror
+                        <div class="table-responsive border rounded">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width:56px;">Pilih</th>
+                                        <th>Nama / NIP</th>
+                                        <th>Jabatan</th>
+                                        <th>Status Sistem</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($registrations as $registration)
+                                        @php
+                                            $user = $registration->user;
+                                            $checked = $user && in_array((string) $user->id, $selectedUserIds, true);
+                                            $selectionDisabled = $wfhDate->letter_status === 'approved' || !$user;
+                                        @endphp
+                                        <tr>
+                                            <td class="align-middle">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox"
+                                                        name="selected_user_ids[]"
+                                                        value="{{ $user ? $user->id : '' }}"
+                                                        class="custom-control-input"
+                                                        id="selectedUser{{ $registration->id }}"
+                                                        {{ $checked ? 'checked' : '' }}
+                                                        {{ $selectionDisabled ? 'disabled' : '' }}>
+                                                    <label class="custom-control-label" for="selectedUser{{ $registration->id }}"></label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <strong>{{ $user->name ?? '-' }}</strong><br>
+                                                <small class="text-muted">{{ $user->nip ?? '-' }}</small>
+                                            </td>
+                                            <td>{{ $user->jabatan ?? '-' }}</td>
+                                            <td>
+                                                @if($registration->status === 'selected')
+                                                    <span class="badge badge-success">Terseleksi Sistem</span>
+                                                @elseif($registration->status === 'not_selected')
+                                                    <span class="badge badge-secondary">Cadangan</span>
+                                                @else
+                                                    <span class="badge badge-info">Terdaftar</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="4" class="text-center text-muted py-4">Belum ada pegawai yang mendaftar.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            Maksimal {{ $quota }} pegawai. Pegawai yang tidak dipilih akan mendapatkan status tidak terpilih setelah surat disetujui.
+                        </small>
+                    </div>
+
+                    @if($wfhDate->registrations->isEmpty())
                         <div class="alert alert-warning mt-3 mb-0">
                             <i class="fas fa-exclamation-triangle mr-1"></i>
-                            Surat tugas dapat diterbitkan setelah ada pegawai yang terpilih oleh sistem.
+                            Surat tugas dapat diterbitkan setelah ada pegawai yang mendaftar.
                         </div>
                     @else
                         <small class="text-muted d-block mt-3">

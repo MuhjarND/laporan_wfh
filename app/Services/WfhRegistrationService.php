@@ -34,7 +34,7 @@ class WfhRegistrationService
     {
         return Carbon::parse($wfhDate->tanggal->format('Y-m-d'), 'Asia/Jayapura')
             ->subDay()
-            ->setTime(16, 30);
+            ->setTime(17, 10);
     }
 
     public function isRegistrationOpen(WfhDate $wfhDate): bool

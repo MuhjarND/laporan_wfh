@@ -217,9 +217,9 @@
 
         .signature-img {
             position: absolute;
-            top: -66px;
-            left: -112px;
-            height: 138px;
+            top: -48px;
+            left: -8px;
+            height: 126px;
             width: auto;
             z-index: 3;
             opacity: .98;

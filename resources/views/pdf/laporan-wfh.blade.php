@@ -39,11 +39,11 @@
         .ttd-section p { margin: 0; padding: 0; line-height: 1.22; }
         .ttd-name { font-weight: bold; text-decoration: underline; }
         .ttd-spacer { height: 54px; }
-        .ttd-img { height: 58px; max-width: 190px; object-fit: contain; }
+        .ttd-img { height: 58px; width: auto; }
         .ttd-stack { position: relative; height: 50px; width: 210px; overflow: visible; }
-        .ttd-stack .ttd-img { position: absolute; left: -42px; top: -38px; height: 132px; max-width: 300px; z-index: 3; opacity: .98; }
+        .ttd-stack .ttd-img { position: absolute; left: -42px; top: -38px; height: 132px; width: auto; z-index: 3; opacity: .98; }
         .ttd-stack-pegawai { margin-top: 0; }
-        .ttd-stack-pegawai .ttd-img { left: -48px; top: -42px; height: 136px; max-width: 310px; }
+        .ttd-stack-pegawai .ttd-img { left: -48px; top: -42px; height: 136px; width: auto; }
         .ttd-name { position: relative; z-index: 1; }
         .cap-img { position: absolute; left: -28px; top: -48px; height: 176px; max-width: 190px; z-index: 2; opacity: .78; }
     </style>

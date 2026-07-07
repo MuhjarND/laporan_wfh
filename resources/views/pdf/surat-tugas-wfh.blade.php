@@ -217,10 +217,10 @@
 
         .signature-img {
             position: absolute;
-            top: -58px;
-            left: -96px;
-            width: 395px;
-            max-height: 168px;
+            top: -66px;
+            left: -112px;
+            height: 138px;
+            width: auto;
             z-index: 3;
             opacity: .98;
         }

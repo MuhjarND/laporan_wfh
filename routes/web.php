@@ -81,6 +81,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])
     Route::post('wfh-dates/{wfhDate}/send-reminder', 'Admin\WfhDateController@sendReminder')->name('wfh-dates.send-reminder');
     Route::post('wfh-dates/{wfhDate}/send-submit-reminder', 'Admin\WfhDateController@sendSubmitReminder')->name('wfh-dates.send-submit-reminder');
     Route::post('wfh-dates/{wfhDate}/publish-letter', 'Admin\WfhDateController@publishLetter')->name('wfh-dates.publish-letter');
+    Route::get('wfh-dates/{wfhDate}/participants', 'Admin\WfhDateController@participants')->name('wfh-dates.participants');
+    Route::post('wfh-dates/{wfhDate}/participants', 'Admin\WfhDateController@storeParticipants')->name('wfh-dates.participants.store');
     Route::get('wfh-dates/{wfhDate}/letter', 'Admin\WfhDateController@downloadLetter')->name('wfh-dates.letter');
     Route::resource('wfh-dates', 'Admin\WfhDateController')->except(['show']);
     Route::post('wfh-dates/{wfhDate}/toggle-active', 'Admin\WfhDateController@toggleActive')->name('wfh-dates.toggle-active');

@@ -20,12 +20,18 @@ class WfhRegistrationController extends Controller
     public function index(WfhRegistrationService $registrationService)
     {
         $user = auth()->user();
-        $wfhDates = WfhDate::with([
-                'users',
-                'registrations' => function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                },
-            ])
+        $canViewRegistrants = $user->canViewWfhRegistrants();
+        $relations = ['users'];
+
+        if ($canViewRegistrants) {
+            $relations[] = 'registrations.user';
+        } else {
+            $relations['registrations'] = function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            };
+        }
+
+        $wfhDates = WfhDate::with($relations)
             ->withCount(['users', 'registrations'])
             ->where('is_active', true)
             ->whereDate('tanggal', '>=', now()->toDateString())
@@ -42,7 +48,7 @@ class WfhRegistrationController extends Controller
             ];
         }
 
-        return view('pegawai.wfh-registrations.index', compact('wfhDates', 'quota', 'registrationWindows'));
+        return view('pegawai.wfh-registrations.index', compact('wfhDates', 'quota', 'registrationWindows', 'canViewRegistrants'));
     }
 
     public function store(WfhDate $wfhDate, WfhRegistrationService $registrationService)

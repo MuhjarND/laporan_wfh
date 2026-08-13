@@ -134,7 +134,7 @@
                     @php $hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']; @endphp
                     @forelse($wfhDates as $date)
                         @php
-                            $myRegistration = $date->registrations->first();
+                            $myRegistration = $date->registrations->firstWhere('user_id', auth()->id());
                             $window = $registrationWindows[$date->id] ?? null;
                             $registrationOpen = $window ? $window['is_open'] : true;
                             $finalPublished = $date->letter_status === 'approved';
@@ -149,7 +149,14 @@
                                 @endif
                             </td>
                             <td>{{ $hariNames[$date->tanggal->dayOfWeek] }}</td>
-                            <td>{{ $date->registrations_count }} pegawai</td>
+                            <td>
+                                {{ $date->registrations_count }} pegawai
+                                @if($canViewRegistrants)
+                                    <button type="button" class="btn btn-xs btn-outline-primary d-block mt-1" data-toggle="modal" data-target="#registrantsModal{{ $date->id }}">
+                                        <i class="fas fa-users mr-1"></i> Lihat Peserta
+                                    </button>
+                                @endif
+                            </td>
                             <td>{{ $date->users_count }} / {{ $quota }} pegawai</td>
                             <td>
                                 @if(!$myRegistration)
@@ -208,7 +215,7 @@
             @php $hariNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']; @endphp
             @forelse($wfhDates as $date)
                 @php
-                    $myRegistration = $date->registrations->first();
+                    $myRegistration = $date->registrations->firstWhere('user_id', auth()->id());
                     $window = $registrationWindows[$date->id] ?? null;
                     $registrationOpen = $window ? $window['is_open'] : true;
                     $finalPublished = $date->letter_status === 'approved';
@@ -244,6 +251,11 @@
                             <div class="wfh-date-stat">
                                 <span>Pendaftar</span>
                                 <strong>{{ $date->registrations_count }} pegawai</strong>
+                                @if($canViewRegistrants)
+                                    <button type="button" class="btn btn-xs btn-outline-primary mt-2" data-toggle="modal" data-target="#registrantsModal{{ $date->id }}">
+                                        <i class="fas fa-users mr-1"></i> Lihat Peserta
+                                    </button>
+                                @endif
                             </div>
                             <div class="wfh-date-stat">
                                 <span>Terseleksi / Kuota</span>
@@ -301,4 +313,63 @@
         <div class="mt-3">{{ $wfhDates->links() }}</div>
     </div>
 </div>
+
+@if($canViewRegistrants)
+    @foreach($wfhDates as $date)
+        <div class="modal fade" id="registrantsModal{{ $date->id }}" tabindex="-1" role="dialog" aria-labelledby="registrantsModalLabel{{ $date->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="registrantsModalLabel{{ $date->id }}">
+                            <i class="fas fa-users mr-2"></i>Pendaftar WFH {{ $date->tanggal->format('d/m/Y') }}
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Tutup">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nama / NIP</th>
+                                        <th>Jabatan</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($date->registrations->sortBy(function ($registration) {
+                                        return strtolower(optional($registration->user)->name);
+                                    }) as $registration)
+                                        <tr>
+                                            <td>
+                                                <strong>{{ optional($registration->user)->name ?: '-' }}</strong><br>
+                                                <small class="text-muted">{{ optional($registration->user)->nip ?: '-' }}</small>
+                                            </td>
+                                            <td>{{ optional($registration->user)->jabatan ?: '-' }}</td>
+                                            <td>
+                                                @if($registration->status === 'selected')
+                                                    <span class="badge badge-success">Terpilih</span>
+                                                @elseif($registration->status === 'not_selected')
+                                                    <span class="badge badge-secondary">Tidak Terpilih</span>
+                                                @else
+                                                    <span class="badge badge-info">Terdaftar</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr><td colspan="3" class="text-center text-muted py-4">Belum ada peserta yang mendaftar.</td></tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+@endif
 @endsection

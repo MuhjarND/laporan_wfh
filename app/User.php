@@ -61,6 +61,15 @@ class User extends Authenticatable
         return $this->role === 'pegawai';
     }
 
+    public function canViewWfhRegistrants()
+    {
+        if (!$this->isAtasan()) {
+            return false;
+        }
+
+        return preg_match('/\b(?:wakil\s+ketua|ketua)\b/i', (string) $this->jabatan) === 1;
+    }
+
     public function getFullIdentityAttribute()
     {
         return $this->name . ' (' . $this->nip . ')';

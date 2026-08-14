@@ -87,6 +87,9 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
+                                <a href="{{ route('admin.wfh-dates.participants', $date) }}" class="btn btn-primary" title="Tambah Pegawai WFH">
+                                    <i class="fas fa-user-plus"></i>
+                                </a>
                                 <a href="{{ route('admin.wfh-dates.edit', $date) }}" class="btn btn-warning" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
